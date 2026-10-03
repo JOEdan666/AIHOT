@@ -16,6 +16,7 @@ import { loadContact, loadMakerAvatar } from "@aihot/backend/site/contact";
 import { loadSiteStats } from "@aihot/backend/site/stats";
 import { itemAvailability } from "@aihot/backend/publication/availability";
 import { listTopicSummaries, loadTopicPage } from "@aihot/backend/publication/topics";
+import { loadTopicDigests } from "@aihot/backend/events/topic-digest";
 import { registerFeedback } from "./feedback.ts";
 
 import { loadHot, loadStoryDetail, resolveStory } from "@aihot/backend/publication/stories";
@@ -94,13 +95,14 @@ export function registerSite(app: FastifyInstance) {
     const filters = await parseFilters(q);
     const limit = Math.min(Math.max(Number(q.limit) || 20, 1), 40);
     const unfiltered = filters.channel === "all" && !filters.category && !filters.lane && !filters.tag && !filters.topic && !q.cursor;
-    const [data, hot] = await Promise.all([
+    const [data, hot, topicDigests] = await Promise.all([
       loadTimeline({ ...filters, cursor: q.cursor || null, limit }),
       unfiltered ? loadHotStrip() : null,
+      unfiltered ? loadTopicDigests({ limit: 4 }) : null,
     ]);
-    const body = { ...data, hot, generatedAt: new Date().toISOString() };
+    const body = { ...data, hot, topicDigests, generatedAt: new Date().toISOString() };
     const cc = cacheUntil(reply, 60, data.refreshAt);
-    return sendJsonWithEtag(req, reply, body, { etagPrefix: "tl", cacheControl: cc, etagOf: { ...data, hot } });
+    return sendJsonWithEtag(req, reply, body, { etagPrefix: "tl", cacheControl: cc, etagOf: { ...data, hot, topicDigests } });
   }));
 
   app.get("/api/site/pool", siteHandler(async (req, reply) => {
@@ -186,7 +188,9 @@ export function registerSite(app: FastifyInstance) {
     const page = Number(looseQuery(req).page ?? 1);
     const data = Number.isInteger(page) ? await loadTopicPage(slug, page) : null;
     if (!data) return sendProblem(req, reply, { status: 404, code: "not_found", detail: "topic page not found", cacheControl: "public, max-age=60" });
-    return sendJsonWithEtag(req, reply, data, { etagPrefix: "topic", cacheControl: "public, max-age=60, s-maxage=60" });
+    // The last seven days in one paragraph, above the list (first page only).
+    const digest = page === 1 ? ((await loadTopicDigests({ slug }))[0] ?? null) : null;
+    return sendJsonWithEtag(req, reply, { ...data, digest }, { etagPrefix: "topic", cacheControl: "public, max-age=60, s-maxage=60" });
   }));
 
   registerFeedback(app);

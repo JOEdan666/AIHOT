@@ -116,8 +116,21 @@ export interface TimelineResponse {
   /** Absolute time when a pending item in this scope becomes visible; the page re-checks then. */
   refreshAt: string | null;
   hot: HotStripEntry[] | null;
+  /** The home page's topic threads: what the busiest topics did in the last seven days (unfiltered first page only). */
+  topicDigests?: TopicDigestEntry[] | null;
   dayCounts: Record<string, number>;
   generatedAt: string;
+}
+
+/** A topic's last seven days, condensed into a headline and a short digest. */
+export interface TopicDigestEntry {
+  slug: string;
+  name: string;
+  headline: string;
+  digest: string;
+  windowFrom: string;
+  windowTo: string;
+  itemCount: number;
 }
 
 export interface PoolResponse {
