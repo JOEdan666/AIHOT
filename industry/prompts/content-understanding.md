@@ -8,19 +8,21 @@
 
 ## 内容类型
 
-`itemType` 必须七选一：
+`itemType` 必须九选一：
 
 - `model_release`：新模型或大版本更新
-- `product_launch`：新产品、工具或重大功能更新
+- `product_launch`：成熟公司的新产品、工具或重大功能更新
 - `tool_or_prompt`：可直接复用的方法、Prompt、Skill 或技巧
-- `research_paper`：论文、研究或技术报告
-- `industry_event`：融资、收购、监管、诉讼、商业动作或人事
+- `research_paper`：论文、研究或技术报告（含 AI 之外的前沿科研）
+- `industry_event`：融资、收购、监管、诉讼、商业动作或人事（成熟公司）
 - `opinion_analysis`：观点、行业判断、复盘或长访谈
 - `tutorial_explainer`：教程、科普、解读或评测
+- `startup_launch`：新创立或早期公司、孵化器新公司、首次发布的产品或早期融资，重点是“谁在做什么、给谁用”
+- `open_source_project`：开源项目、仓库、开源硬件，或个人与小团队做的可见作品（桌宠、桌面机器人、玩具、创意 Demo）
 
-优先级：发了模型选 model_release；发了工具选 product_launch；发了 Prompt 或方法选 tool_or_prompt；论文优先 research_paper；评测选 tutorial_explainer。
+优先级：发了模型选 model_release；早期公司或首次亮相的产品选 startup_launch；开源仓库或个人作品选 open_source_project；成熟公司发了工具选 product_launch；发了 Prompt 或方法选 tool_or_prompt；论文优先 research_paper；评测选 tutorial_explainer。
 
-输出前检查 `itemType` 与第一个分类标签是否自洽：`model_release` 对应“模型发布”，`product_launch` 对应“产品更新”，`research_paper` 对应“论文/研究”，`industry_event` 对应“行业动态”或“政策/监管”，`opinion_analysis` 对应“大佬观点”或“现象/趋势”，`tutorial_explainer` 对应“教程/实践”或“评测/基准”。如果二者冲突，按当前材料的核心事件修正后再输出。
+输出前检查 `itemType` 与第一个分类标签是否自洽：`model_release` 对应“模型发布”，`product_launch` 对应“产品更新”或“机器人”，`research_paper` 对应“论文/研究”或“跨领域前沿”，`industry_event` 对应“行业动态”或“政策/监管”，`opinion_analysis` 对应“大佬观点”或“现象/趋势”，`tutorial_explainer` 对应“教程/实践”或“评测/基准”，`startup_launch` 对应“创业公司”，`open_source_project` 对应“开源/仓库”或“小而美”。如果二者冲突，按当前材料的核心事件修正后再输出。
 
 ## 作者角色
 
@@ -32,18 +34,18 @@
 
 ## 标签
 
-`tags` 输出 1–6 个字符串。第一个必须从以下分类标签中选一个：模型发布、产品更新、开源/仓库、论文/研究、教程/实践、大佬观点、评测/基准、安全/对齐、现象/趋势、行业动态、政策/监管、非AI/通用工具、其他。
+`tags` 输出 1–6 个字符串。第一个必须从以下分类标签中选一个：产品更新、模型发布、机器人、论文/研究、跨领域前沿、创业公司、开源/仓库、小而美、教程/实践、大佬观点、评测/基准、安全/对齐、现象/趋势、行业动态、政策/监管、非AI/通用工具、其他。
 
 其后可选 0–5 个适用标签，并且只能来自以下两个白名单：
 
-- 主题：Agent、编码、推理、多模态、语音、视频、图像生成、RAG、端侧、数据/训练、搜索、部署/工程、开源生态、具身智能、MCP/工具调用
-- 实体：OpenAI、Anthropic、DeepSeek、DeepMind、Google、Meta、Microsoft、xAI、Hugging Face、GitHub、arXiv
+- 主题：Agent、编码、推理、多模态、语音、视频、图像生成、端侧、数据/训练、开源生态、MCP/工具调用、具身智能、人形机器人、桌面机器人/桌宠、机械臂、自动驾驶、硬件/芯片、生物医药、能源、太空、脑机接口、YC、融资、开发者工具、消费级应用、B2B/SaaS、陪伴/情感
+- 实体：OpenAI、Anthropic、DeepSeek、DeepMind、Google、Meta、Microsoft、xAI、NVIDIA、Tesla、Figure、Hugging Face、GitHub、arXiv、Y Combinator
 
-正文中即使明确出现了 NVIDIA、Apple、阿里等其他实体，也不要把它们放进 `tags`。不要创造白名单之外的标签。没有适用的主题或实体时，只返回第一个分类标签；例如学校限制 AI 使用的监管新闻，不需要强行归到“编码”或“推理”。
+正文中即使明确出现了其他公司或机构，也不要把它们放进 `tags`。不要创造白名单之外的标签。没有适用的主题或实体时，只返回第一个分类标签，不要凑标签。
 
 ## 候选阅读价值
 
-`editorialJudgment` 是当前单篇材料若最终被系统选为代表稿时可展示的推荐理由，不是精选结论。通常写 45–70 个中文字符，只写 1 句话、最多 2 个分句；在原文事实基础上只提供最关键的一层阅读价值：背景、比较、影响或可迁移方法四选一。它不是标题摘要，也不是对整个事件的泛泛评价；不得借用同事件其他稿件中的事实，不得补写原文没有的最新事件、数字、专名、动机或能力结论。
+`editorialJudgment` 是当前单篇材料若最终被系统选为代表稿时可展示的推荐理由，不是精选结论。通常写 45–70 个中文字符，只写 1 句话、最多 2 个分句；在原文事实基础上只提供最关键的一层阅读价值：背景、比较、影响、可迁移方法或对创业者的启发五选一。对 startup_launch 和 open_source_project，优先写清它解决了谁的什么问题、做法哪里有意思。它不是标题摘要，也不是对整个事件的泛泛评价；不得借用同事件其他稿件中的事实，不得补写原文没有的最新事件、数字、专名、动机或能力结论。
 
 语气克制、自然、具体，不命令读者。禁止使用：必读、必须看、赶紧、立刻、不容错过、重磅、颠覆、革命性、划时代、炸裂、这意味着、值得注意的是、证实、证明、首次、首个、最大、唯一、创纪录、填补空白、重新定义、重塑、仍需验证、有待观察、实际效果未知。禁止冒号、破折号和英文双引号。
 
