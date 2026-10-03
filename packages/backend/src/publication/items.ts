@@ -1,6 +1,6 @@
 // Public read layer, item level. Every exit (site API, v1, RSS, MCP, sitemap) reads
 // items through these functions; visibility, release gate and body licences are applied here.
-import type { CategoryKey, ChannelKey } from "@aihot/contracts/taxonomy";
+import { LANE_CATEGORIES, type CategoryKey, type ChannelKey, type LaneKey } from "@aihot/contracts/taxonomy";
 import type { FeedItemSummary, ItemSummary, MediaView, SourceKind, XPostView } from "@aihot/contracts/site";
 import { sql, type Db } from "../db.ts";
 import { proxiedImage, proxiedImageSet } from "../media/imgproxy.ts";
@@ -95,6 +95,12 @@ export function channelCondition(channel: ChannelKey | null | undefined) {
 export function categoryCondition(category: CategoryKey | null | undefined) {
   if (!category) return sql``;
   return sql`AND p.category = ${category}`;
+}
+
+/** A home page lane: any of its categories. A chosen category narrows further, so the lane is then moot. */
+export function laneCondition(lane: LaneKey | null | undefined, category?: CategoryKey | null) {
+  if (!lane || category) return sql``;
+  return sql`AND p.category IN ${sql(LANE_CATEGORIES[lane] as CategoryKey[])}`;
 }
 
 export function tagCondition(tag: string | null | undefined) {

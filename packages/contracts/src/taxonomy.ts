@@ -1,6 +1,6 @@
 // Public vocabularies shared by the website, the API and the worker. The categories themselves belong to
 // the industry pack (industry/taxonomy.ts); their keys are external identities (URLs, API, RSS).
-import { CATEGORIES } from "@aihot/industry/taxonomy";
+import { CATEGORIES, LANES } from "@aihot/industry/taxonomy";
 
 export type CategoryKey = (typeof CATEGORIES)[number]["key"];
 export const CATEGORY_KEYS = CATEGORIES.map((c) => c.key) as unknown as readonly [CategoryKey, ...CategoryKey[]];
@@ -18,6 +18,21 @@ export function toPublicApiCategory(category: string | null): PublicApiCategoryK
 
 export function isCategoryKey(value: unknown): value is CategoryKey {
   return typeof value === "string" && (CATEGORY_KEYS as readonly string[]).includes(value);
+}
+
+/** Home page lanes (industry/taxonomy.ts): each groups some categories. Keys appear in URLs (?lane=). */
+export type LaneKey = (typeof LANES)[number]["key"];
+export const LANE_KEYS = LANES.map((l) => l.key) as unknown as readonly [LaneKey, ...LaneKey[]];
+export const LANE_LABELS = Object.fromEntries(LANES.map((l) => [l.key, l.label])) as Record<LaneKey, string>;
+export const LANE_CATEGORIES = Object.fromEntries(LANES.map((l) => [l.key, l.categories as readonly CategoryKey[]])) as Record<LaneKey, readonly CategoryKey[]>;
+
+export function isLaneKey(value: unknown): value is LaneKey {
+  return typeof value === "string" && (LANE_KEYS as readonly string[]).includes(value);
+}
+
+/** The lane a category belongs to (null when no lane lists it). */
+export function laneOf(category: CategoryKey): LaneKey | null {
+  return LANE_KEYS.find((l) => LANE_CATEGORIES[l].includes(category)) ?? null;
 }
 
 export const CHANNEL_KEYS = ["all", "news", "x", "firstParty"] as const;
