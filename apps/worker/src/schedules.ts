@@ -10,6 +10,7 @@ import { scheduleMpReconcile } from "@aihot/backend/sources/mp";
 import { refreshSourceIcons } from "@aihot/backend/sources/icons";
 import { computeHotRanking, snapshotHeat } from "@aihot/backend/events/hot";
 import { refreshStoryStatuses } from "@aihot/backend/events/digest";
+import { composeTopicDigests } from "@aihot/backend/events/topic-digest";
 import { linkRelatedStories } from "@aihot/backend/events/group";
 import { catchUpReports, composeDaily, composeMonthly, composeWeekly } from "@aihot/backend/reports/compose";
 import { addDays, beijingDate, isoWeekLabel } from "@aihot/contracts/time";
@@ -43,6 +44,8 @@ export const SCHEDULES: Scheduled[] = [
   { name: "hot.snapshot", cron: "2 * * * *", run: () => snapshotHeat() },
   { name: "stories.status", cron: "7 * * * *", run: refreshStoryStatuses },
   { name: "stories.links", cron: "12 * * * *", run: linkRelatedStories },
+  // What each busy topic did in the last seven days, written before the morning report (model calls).
+  { name: "topics.digest", cron: "30 7 * * *", missed: "once", run: () => composeTopicDigests() },
   { name: "reports.daily", cron: "0 8 * * *", missed: "once", run: () => composeDaily(beijingDate(Date.now())) },
   { name: "reports.weekly", cron: "0 10 * * 1", missed: "once", run: () => composeWeekly(isoWeekLabel(addDays(beijingDate(Date.now()), -7))) },
   {

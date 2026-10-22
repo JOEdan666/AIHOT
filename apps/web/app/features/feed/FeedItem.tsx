@@ -19,9 +19,11 @@ export interface FeedItemProps {
   onOpen?: (id: string) => void;
   /** Show category and tags under the text (全部动态, topics, search). */
   showTags?: boolean;
+  /** One line per item (the title), for lists under a digest that already tells the story. */
+  compact?: boolean;
 }
 
-export const FeedItem = memo(function FeedItem({ item, group, filters, read = false, onOpen, showTags = false }: FeedItemProps) {
+export const FeedItem = memo(function FeedItem({ item, group, filters, read = false, onOpen, showTags = false, compact = false }: FeedItemProps) {
   const isX = item.channel === "x" && !!item.x;
   const open = () => onOpen?.(item.id);
   const showSources = !!group && (group.additionalSourceCount > 0 || (group.developmentCount <= 1 && group.reportCount > 1));
@@ -58,12 +60,12 @@ export const FeedItem = memo(function FeedItem({ item, group, filters, read = fa
         </p>
       ) : (
         <>
-          <h3 className={`mt-2 line-clamp-2 text-[17px] font-bold leading-[1.55] lg:line-clamp-none lg:font-[650] ${read ? "text-ink-4" : "text-ink"}`}>
+          <h3 className={`mt-2 text-[17px] font-bold leading-[1.55] lg:font-[650] ${compact ? "line-clamp-1" : "line-clamp-2 lg:line-clamp-none"} ${read ? "text-ink-4" : "text-ink"}`}>
             <IntentLink to={`/items/${item.id}`} onClick={open} className="after:absolute after:inset-0 after:content-['']">
               {item.title}
             </IntentLink>
           </h3>
-          {item.summary && <p className="mt-1.5 line-clamp-2 text-[14.5px] leading-[1.75] text-ink-3 lg:mt-2 lg:line-clamp-3 lg:text-[15px]">{item.summary}</p>}
+          {item.summary && !compact && <p className="mt-1.5 line-clamp-2 text-[14.5px] leading-[1.75] text-ink-3 lg:mt-2 lg:line-clamp-3 lg:text-[15px]">{item.summary}</p>}
         </>
       )}
 
@@ -93,7 +95,7 @@ export const FeedItem = memo(function FeedItem({ item, group, filters, read = fa
         </div>
       )}
 
-      {item.reason && (
+      {item.reason && !compact && (
         <div className="mt-2.5 rounded-control bg-bg-sunk px-3 py-2 dark:bg-bg-muted/60 lg:mt-3 lg:rounded-none lg:border-t lg:border-line-soft lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-3 lg:dark:bg-transparent">
           <p className="line-clamp-2 text-[13px] leading-[1.65] text-ink-3 lg:line-clamp-none lg:leading-[1.75] lg:text-note">推荐理由：{item.reason}</p>
         </div>

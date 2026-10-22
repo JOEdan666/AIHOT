@@ -8,6 +8,7 @@ import { listPath, organizationLd, pageMeta } from "../lib/seo";
 import { Wordmark } from "../components/Logo";
 import { Timeline } from "../features/feed/Timeline";
 import { HotTopics } from "../features/feed/HotTopics";
+import { TopicDigests } from "../features/feed/TopicDigests";
 import { CategoryTabs, LaneTabs, SearchField, SearchIconLink } from "../features/feed/Filters";
 import { beijingDate, beijingWeekday } from "../lib/format";
 
@@ -69,6 +70,7 @@ export default function Home() {
       </div>
 
       {data.hot && <HotTopics entries={data.hot} />}
+      {data.topicDigests && <TopicDigests entries={data.topicDigests} />}
 
       <h2 className="mt-6 text-[20px] font-bold text-ink lg:hidden">{filters.tag ? title : filters.lane ? title : "最新精选"}</h2>
       <LaneTabs base="/" lane={filters.lane} layoutId="home-lane-mobile" size="sm" className="mt-3 lg:hidden" />

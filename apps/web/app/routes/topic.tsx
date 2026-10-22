@@ -1,11 +1,12 @@
 import { SITE, withSubject } from "@aihot/industry/site";
 import { Link, redirect, useLoaderData } from "react-router";
 import type { Route } from "./+types/topic";
-import type { FeedItemSummary } from "@aihot/contracts/site";
+import type { FeedItemSummary, TopicDigestEntry } from "@aihot/contracts/site";
 import { loadOr404 } from "../lib/api.server";
 import { breadcrumbLd, pageMeta, titled } from "../lib/seo";
 import { DayList, Pagination } from "../features/feed/DayList";
 import { EmptyState, MoreLink } from "../components/ui/Page";
+import { TopicDigestCard } from "../features/feed/TopicDigests";
 
 /** Selected items of a topic: shared caches keep the page as long as its api answer (one minute). */
 export function headers() {
@@ -17,6 +18,7 @@ interface TopicPageData {
   items: FeedItemSummary[];
   page: number;
   pageCount: number;
+  digest: TopicDigestEntry | null;
 }
 
 export async function loader({ params, request }: Route.LoaderArgs) {
@@ -44,7 +46,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 
 export default function TopicPage() {
   const { data } = useLoaderData<typeof loader>();
-  const { topic, items, page, pageCount } = data;
+  const { topic, items, page, pageCount, digest } = data;
   const href = (p: number) => (p <= 1 ? `/topics/${topic.slug}` : `/topics/${topic.slug}/page/${p}`);
   const first = (page - 1) * 20 + 1;
   const last = first + items.length - 1;
@@ -75,6 +77,12 @@ export default function TopicPage() {
         </div>
       </header>
 
+      {digest && page === 1 && (
+        <div className="mb-4">
+          <TopicDigestCard digest={digest} />
+        </div>
+      )}
+
       <div className="mb-1 mt-2 flex items-baseline justify-between">
         <h2 className="text-[18px] font-bold text-ink">最新精选</h2>
         {items.length > 0 && (
@@ -88,7 +96,8 @@ export default function TopicPage() {
           <EmptyState title="这个主题暂时还没有精选内容" />
         </div>
       ) : (
-        <DayList items={items} />
+        // Under a digest that already tells the story, each item is one line.
+        <DayList items={items} compact={!!digest} />
       )}
       <Pagination page={page} pageCount={pageCount} href={href} />
     </div>
