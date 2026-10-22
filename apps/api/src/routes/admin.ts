@@ -14,6 +14,9 @@ import { releaseReceipt, requeueFailedArticles, resolveDelivery, runsOverview } 
 import { listBudgets, listTargets, replaceContactQr, setTargetEnabled, updateBudget } from "@aihot/backend/admin/settings";
 import { createSource, fetchNow, listSources, previewSource, sourceDetail, updateSource } from "@aihot/backend/admin/sources";
 import { sql } from "@aihot/backend/db";
+import { addNote, deleteNote, loadDesk, updateNote } from "@aihot/backend/inspiration/notes";
+import { loadWeeklyReview, updateReviewAction } from "@aihot/backend/inspiration/review";
+import { requestWeeklyReview } from "@aihot/backend/jobs/inspiration";
 import { loadContact } from "@aihot/backend/site/contact";
 import { sendProblem } from "../http/respond.ts";
 import { adminHandler } from "./admin-auth.ts";
@@ -32,7 +35,19 @@ function decodeImage(dataUrl: unknown): Buffer {
   return Buffer.from(m[2]!, "base64");
 }
 
+/** The signed-in owner of an inspiration notebook. */
+const ownerOf = (admin: { userId: number | null }) => `admin:${admin.userId ?? "dev"}`;
+
 export function registerAdmin(app: FastifyInstance) {
+  // Inspiration notebook: the signed-in owner's own notes and weekly review (private to them).
+  app.get("/api/admin/desk", adminHandler(async (req, _reply, admin) => loadDesk(ownerOf(admin), { days: Math.min(30, Number(q(req).days) || 7), noted: q(req).noted === "1" })));
+  app.post("/api/admin/notes", adminHandler(async (req, _reply, admin) => addNote(ownerOf(admin), body(req))));
+  app.patch("/api/admin/notes/:id", adminHandler(async (req, reply, admin) => orNotFound(req, reply, await updateNote(ownerOf(admin), Number(param(req, "id")), body(req)))));
+  app.delete("/api/admin/notes/:id", adminHandler(async (req, reply, admin) => orNotFound(req, reply, await deleteNote(ownerOf(admin), Number(param(req, "id"))))));
+  app.get("/api/admin/review", adminHandler(async (_req, _reply, admin) => ({ review: await loadWeeklyReview(ownerOf(admin)) })));
+  app.post("/api/admin/review/generate", adminHandler(async (_req, _reply, admin) => ({ queued: !!(await requestWeeklyReview(ownerOf(admin))) })));
+  app.patch("/api/admin/review", adminHandler(async (req, reply, admin) => orNotFound(req, reply, await updateReviewAction(ownerOf(admin), body(req)))));
+
   // Sources (F18)
   app.get("/api/admin/sources", adminHandler(async (req) => {
     const f = q(req);

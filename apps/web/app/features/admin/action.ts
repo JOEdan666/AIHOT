@@ -48,7 +48,8 @@ export function useAdminAction() {
         const res = await fetch(path, {
           method,
           credentials: "same-origin",
-          headers: { "content-type": "application/json", "x-csrf-token": me.csrf, "idempotency-key": key },
+          // No content-type without a body: the api rejects an empty JSON body (a DELETE usually has none).
+          headers: { ...(body === undefined ? {} : { "content-type": "application/json" }), "x-csrf-token": me.csrf, "idempotency-key": key },
           body: body === undefined ? undefined : JSON.stringify(body),
         });
         if (res.status === 401) {
