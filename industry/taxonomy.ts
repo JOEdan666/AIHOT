@@ -8,40 +8,54 @@
  * 没归上类的资料在日报里放进第一个 key 为 industry 的类别所在的节（没有就放最后一节）。
  */
 export const CATEGORIES = [
-  { key: "ai-models", label: "模型", section: "模型发布/更新", guide: "新模型、模型版本、权重开放、模型能力与价格变化的发布与评测结果" },
-  { key: "ai-products", label: "产品", section: "产品发布/更新", guide: "AI 产品、功能、应用、工具、API 与平台的发布和更新" },
-  { key: "industry", label: "行业", section: "行业动态", guide: "公司经营、融资并购、人事、合作、诉讼、监管与政策、市场与基础设施" },
-  { key: "paper", label: "论文", section: "论文研究", guide: "研究论文、技术报告、基准与数据集" },
-  { key: "tip", label: "教程", section: "技巧与观点", guide: "教程、实践经验、使用技巧、提示词与工具用法、深度技术讲解" },
-  { key: "opinion", label: "观点", section: "技巧与观点", guide: "人物观点、评论、分析、访谈、现象与趋势讨论" },
+  { key: "ai-models", label: "模型", section: "AI 前沿", guide: "新模型、模型版本、权重开放、模型能力与价格变化的发布与评测结果" },
+  { key: "ai-products", label: "AI 产品", section: "AI 前沿", guide: "AI 产品、功能、应用、Agent、API 与开发平台的发布和重大更新（成熟公司发布的）" },
+  { key: "robotics", label: "机器人", section: "机器人与具身智能", guide: "机器人、具身智能、人形机器人、机械臂、自动驾驶与机器人硬件的进展、发布与演示" },
+  { key: "research", label: "研究", section: "研究与跨领域", guide: "AI 与机器人方向的研究论文、技术报告、基准与数据集" },
+  { key: "frontier", label: "跨领域", section: "研究与跨领域", guide: "AI 之外的前沿科技进展：生物医药、能源、材料、芯片与硬件、太空、脑机接口等，以及它们和 AI 的交叉" },
+  { key: "opinion", label: "观点", section: "观点与趋势", guide: "有分量的人物观点、深度分析、访谈、行业判断与趋势讨论" },
+  { key: "startups", label: "创业公司", section: "创业与开源", guide: "新创立或早期的公司与产品：YC 等孵化器的新公司、首次发布的产品、早期融资（说清楚做什么、给谁用），不含大公司的常规发布" },
+  { key: "open-source", label: "开源项目", section: "创业与开源", guide: "开源项目与仓库：开源机器人、Agent、工具、模型代码与硬件设计，能直接看到或复现的作品" },
+  { key: "indie", label: "小而美", section: "创业与开源", guide: "个人或小团队做的有意思的作品：桌宠、桌面机器人、玩具、副业项目、创意 Demo 与小工具" },
+] as const;
+
+/**
+ * 首页的两栏。每栏由若干类别组成；key 会出现在网址里（/?lane=），上线后不要改。
+ * 一个类别只能属于一栏。
+ */
+export const LANES = [
+  { key: "frontier", label: "前沿动态", categories: ["ai-models", "ai-products", "robotics", "research", "frontier", "opinion"] },
+  { key: "startup", label: "创业与开源", categories: ["startups", "open-source", "indie"] },
 ] as const;
 
 /**
  * 内容理解一步给每篇资料判的“内容类型”（写在 prompts/content-understanding.md 里，改了类型要同步改那份提示词）。
  * 评分提示词（prompts/selection-score.md）按类型给五个维度不同的权重。
  */
-export const ITEM_TYPES = ["model_release", "product_launch", "tool_or_prompt", "research_paper", "industry_event", "opinion_analysis", "tutorial_explainer"] as const;
+export const ITEM_TYPES = ["model_release", "product_launch", "tool_or_prompt", "research_paper", "industry_event", "opinion_analysis", "tutorial_explainer", "startup_launch", "open_source_project"] as const;
 
 // ── 标签词表 ────────────────────────────────────────────────────────────────────────────
 
 /** 每篇资料的第一个标签必须是这些“分类标签”之一。 */
 export const CATEGORY_TAGS = [
-  "产品更新", "模型发布", "论文/研究", "开源/仓库", "教程/实践", "现象/趋势", "大佬观点", "评测/基准", "安全/对齐", "行业动态", "政策/监管",
-  "非AI/通用工具", "其他",
+  "产品更新", "模型发布", "机器人", "论文/研究", "跨领域前沿", "创业公司", "开源/仓库", "小而美", "教程/实践", "现象/趋势", "大佬观点", "评测/基准",
+  "安全/对齐", "行业动态", "政策/监管", "非AI/通用工具", "其他",
 ] as const;
 
 /** 可选的主题标签。 */
 export const TOPIC_TAGS = [
-  "Agent", "编码", "推理", "多模态", "语音", "视频", "图像生成", "RAG", "端侧", "数据/训练", "搜索", "部署/工程", "开源生态", "具身智能", "MCP/工具调用",
+  "Agent", "编码", "推理", "多模态", "语音", "视频", "图像生成", "端侧", "数据/训练", "开源生态", "MCP/工具调用",
+  "具身智能", "人形机器人", "桌面机器人/桌宠", "机械臂", "自动驾驶", "硬件/芯片", "生物医药", "能源", "太空", "脑机接口",
+  "YC", "融资", "开发者工具", "消费级应用", "B2B/SaaS", "陪伴/情感",
 ] as const;
 
 /** 可选的实体标签（公司、机构、平台）。 */
-export const ENTITY_TAGS = ["OpenAI", "Anthropic", "DeepSeek", "DeepMind", "Google", "Meta", "Microsoft", "xAI", "Hugging Face", "GitHub", "arXiv"] as const;
+export const ENTITY_TAGS = ["OpenAI", "Anthropic", "DeepSeek", "DeepMind", "Google", "Meta", "Microsoft", "xAI", "NVIDIA", "Tesla", "Figure", "Hugging Face", "GitHub", "arXiv", "Y Combinator"] as const;
 
 /** 模型常写的近义词，统一成词表里的写法。 */
 export const TAG_SYNONYMS: Readonly<Record<string, string>> = {
   "教程/玩法": "教程/实践", "技巧/最佳实践": "教程/实践", "合作/生态": "行业动态", "融资/收购": "行业动态", "公司动态": "行业动态",
-  合作: "行业动态", 生态: "行业动态", 融资: "行业动态", 收购: "行业动态", 投资: "行业动态", 并购: "行业动态",
+  合作: "行业动态", 生态: "行业动态", 收购: "行业动态", 投资: "行业动态", 并购: "行业动态",
   政策: "政策/监管", 监管: "政策/监管", 法规: "政策/监管", 安全: "安全/对齐", 对齐: "安全/对齐",
   论文: "论文/研究", 研究: "论文/研究", paper: "论文/研究", papers: "论文/研究",
   "open-source": "开源/仓库", 开源: "开源/仓库", 仓库: "开源/仓库", repo: "开源/仓库",
@@ -49,12 +63,15 @@ export const TAG_SYNONYMS: Readonly<Record<string, string>> = {
   产品: "产品更新", 更新: "产品更新", 发布: "模型发布", 模型: "模型发布", 趋势: "现象/趋势", 现象: "现象/趋势", 观点: "大佬观点",
   视频生成: "视频", 非ai: "非AI/通用工具", "non-ai": "非AI/通用工具", 通用工具: "非AI/通用工具", 工程工具: "非AI/通用工具",
   安全扫描: "非AI/通用工具", devops: "非AI/通用工具", 行业: "行业动态", 动态: "行业动态",
+  机器人: "机器人", robotics: "机器人", 具身: "机器人", 人形: "机器人", 创业: "创业公司", startup: "创业公司", 初创: "创业公司",
+  跨领域: "跨领域前沿", 前沿科技: "跨领域前沿", 生物: "跨领域前沿", 小工具: "小而美", 副业: "小而美", 独立开发: "小而美", 桌宠: "小而美",
 };
 
 /** 模型漏了分类标签时，按内容类型补一个。 */
 export const CATEGORY_BY_ITEM_TYPE: Readonly<Record<string, string>> = {
   model_release: "模型发布", product_launch: "产品更新", tool_or_prompt: "教程/实践", research_paper: "论文/研究",
   industry_event: "行业动态", opinion_analysis: "大佬观点", tutorial_explainer: "教程/实践",
+  startup_launch: "创业公司", open_source_project: "开源/仓库",
 };
 
 // ── 公司与主体 ──────────────────────────────────────────────────────────────────────────
@@ -76,6 +93,9 @@ export const ENTITIES: Record<string, { name: string; displayTag: string | null;
   "hugging-face": { name: "Hugging Face", displayTag: "Hugging Face", aliases: ["Hugging Face"] },
   cursor: { name: "Cursor", displayTag: null, aliases: ["Cursor", "Anysphere"] },
   openrouter: { name: "OpenRouter", displayTag: null, aliases: ["OpenRouter"] },
+  tesla: { name: "Tesla / Optimus", displayTag: "Tesla", aliases: ["Tesla", "特斯拉", "Optimus"] },
+  figure: { name: "Figure", displayTag: "Figure", aliases: ["Figure AI", "Figure 0"] },
+  "y-combinator": { name: "Y Combinator", displayTag: "Y Combinator", aliases: ["Y Combinator", "YC"] },
 };
 
 /**

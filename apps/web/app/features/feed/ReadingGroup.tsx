@@ -13,6 +13,7 @@ function filterParams(filters: TimelineFilters | undefined, cursor: string | nul
   const sp = new URLSearchParams();
   if (filters?.channel && filters.channel !== "all") sp.set("channel", filters.channel);
   if (filters?.category) sp.set("category", filters.category);
+  if (filters?.lane) sp.set("lane", filters.lane);
   if (filters?.tag) sp.set("tag", filters.tag);
   if (cursor) sp.set("cursor", cursor);
   return sp;

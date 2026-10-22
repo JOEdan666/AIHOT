@@ -1,7 +1,7 @@
 // Feed filters: the channel and category row, and search.
 import { useEffect, useRef, useState } from "react";
 import { Form, Link, useNavigation, useSearchParams } from "react-router";
-import { CATEGORY_KEYS, CATEGORY_LABELS, CHANNEL_LABELS, type CategoryKey, type ChannelKey } from "@aihot/contracts/taxonomy";
+import { CATEGORY_KEYS, CATEGORY_LABELS, CHANNEL_LABELS, LANE_CATEGORIES, LANE_KEYS, LANE_LABELS, type CategoryKey, type ChannelKey, type LaneKey } from "@aihot/contracts/taxonomy";
 import { IconClose, IconSearch } from "../../components/icons";
 import { PillTabs } from "../../components/ui/Tabs";
 
@@ -23,15 +23,27 @@ export function hrefWith(base: string, params: URLSearchParams, patch: Record<st
  * time: picking 一手 clears the category and picking a category clears 一手. Older 资讯 / X links
  * still filter; the row then shows 全部.
  */
-export function CategoryTabs({ base, category, channel = "all", layoutId, size = "md", className = "" }: { base: string; category: CategoryKey | null; channel?: ChannelKey; layoutId: string; size?: "md" | "sm"; className?: string }) {
+export function CategoryTabs({ base, category, channel = "all", lane = null, layoutId, size = "md", className = "" }: { base: string; category: CategoryKey | null; channel?: ChannelKey; lane?: LaneKey | null; layoutId: string; size?: "md" | "sm"; className?: string }) {
   const [params] = useSearchParams();
+  // Inside a lane, only that lane's categories are offered.
+  const keys = lane ? LANE_CATEGORIES[lane] : CATEGORY_KEYS;
   const items = [
     { key: "all", label: "全部", to: hrefWith(base, params, { category: null, channel: null }) },
     { key: "firstParty", label: CHANNEL_LABELS.firstParty, to: hrefWith(base, params, { category: null, channel: "firstParty" }) },
-    ...CATEGORY_KEYS.map((k) => ({ key: k, label: CATEGORY_LABELS[k], to: hrefWith(base, params, { category: k, channel: null }) })),
+    ...keys.map((k) => ({ key: k, label: CATEGORY_LABELS[k], to: hrefWith(base, params, { category: k, channel: null }) })),
   ];
   const active = channel === "firstParty" ? "firstParty" : (category ?? "all");
   return <PillTabs items={items} active={active} layoutId={layoutId} label="筛选" size={size} className={className} />;
+}
+
+/** The home page's two lanes (前沿动态 / 创业与开源) plus 全部. Switching lanes clears the category. */
+export function LaneTabs({ base, lane, layoutId, size = "md", className = "" }: { base: string; lane: LaneKey | null; layoutId: string; size?: "md" | "sm"; className?: string }) {
+  const [params] = useSearchParams();
+  const items = [
+    { key: "all", label: "全部", to: hrefWith(base, params, { lane: null, category: null }) },
+    ...LANE_KEYS.map((k) => ({ key: k, label: LANE_LABELS[k], to: hrefWith(base, params, { lane: k, category: null }) })),
+  ];
+  return <PillTabs items={items} active={lane ?? "all"} layoutId={layoutId} label="栏目" size={size} className={className} />;
 }
 
 function useSlashFocus(ref: React.RefObject<HTMLInputElement | null>) {

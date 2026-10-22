@@ -1,6 +1,6 @@
 // First-party site API (/api/site/*). Not a public API: it may evolve with the website,
 // but it is served from the same public read layer as v1, RSS and MCP.
-import type { CategoryKey, ChannelKey } from "./taxonomy.ts";
+import type { CategoryKey, ChannelKey, LaneKey } from "./taxonomy.ts";
 
 export type SourceKind = "rss" | "web_list" | "json_list" | "x_search" | "mp_account" | "external";
 
@@ -103,6 +103,8 @@ export interface HotStripEntry {
 export interface TimelineFilters {
   channel: ChannelKey;
   category: CategoryKey | null;
+  /** A home page lane: its categories (ignored when a category is chosen). */
+  lane?: LaneKey | null;
   tag: string | null;
   topic?: string | null;
 }

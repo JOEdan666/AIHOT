@@ -27,6 +27,7 @@
 ## 2. 分类、标签和主题：`industry/taxonomy.ts`、`industry/topics.json`
 
 - `CATEGORIES`：首页和“全部动态”的筛选类别。`key` 会出现在网址和接口里（`/all?category=`、`/feed/category/<key>.xml`），上线后不要改；`label` 是显示名；`section` 是日报里的分节；`guide` 告诉模型怎么归类。
+- `LANES`：首页的几栏（比如“前沿动态”“创业与开源”），每栏由若干类别组成，一个类别只属于一栏。`key` 会出现在网址里（`/?lane=`），上线后不要改。
 - `CATEGORY_TAGS`、`TOPIC_TAGS`、`ENTITY_TAGS`：模型打标签时只能从这里选。第一个标签必须是“分类标签”。
 - `ENTITIES`：行业里的主要公司或机构，用于“公司”类主题页。`IDENTITY_LEXICON`、`PUBLISHER_DOMAINS` 用来防止模型在标题摘要里写进原文没提到的公司，别的行业没有这个需要可以清空。
 - `ITEM_TYPES`：内容类型，和评分提示词里的权重表对应，改了要一起改提示词。

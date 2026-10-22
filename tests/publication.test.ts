@@ -43,13 +43,13 @@ after(async () => {
 
 let n = 0;
 /** A selected article with full text and a summary. */
-async function article(): Promise<string> {
+async function article(category = "ai-models"): Promise<string> {
   n += 1;
   const { articleId } = await upsertMaterial({
     sourceId: SOURCE, url: `https://example.com/${T}-${n}`, title: `Test ${n}`, bodyText: BODY, bodyHtml: `<p>${BODY}</p>`, bodyStatus: "ok", via: "fetch", publishedAt: new Date(),
   });
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, reason_zh, score, selected)
-            VALUES (${articleId}, 1, 'rule', 'pass', 'ai-models', ${`标题${n}-${T}`}, ${`SUMMARY-${n}-${T}`}, '理由', 90, true)`;
+            VALUES (${articleId}, 1, 'rule', 'pass', ${category}, ${`标题${n}-${T}`}, ${`SUMMARY-${n}-${T}`}, '理由', 90, true)`;
   return articleId;
 }
 
@@ -383,4 +383,23 @@ test("minimal sync projection preserves snapshot fields, pagination bindings and
   await setVisibility(id, { visibility: 'withdrawn', reason: 'sync test', version: 0 }, 'test');
   const removed = await getChanges(minimalChanges.cursor);
   assert.ok(removed.changes.some((c: any) => c.op === 'remove' && c.id === id));
+});
+
+test("a home lane lists only its own categories; a chosen category narrows inside it", async () => {
+  const robot = await article("robotics");
+  const startup = await article("startups");
+  const indie = await article("indie");
+  for (const id of [robot, startup, indie]) await publishArticle(id, released());
+  const ids = async (qs: string) => {
+    const res = await get(`/api/site/timeline?${qs}&limit=40`);
+    assert.equal(res.status, 200, qs);
+    return new Set((JSON.parse(res.body).cards as { item: { id: string } }[]).map((c) => c.item.id));
+  };
+  const startupLane = await ids("lane=startup");
+  assert.ok(startupLane.has(startup) && startupLane.has(indie) && !startupLane.has(robot));
+  const frontierLane = await ids("lane=frontier");
+  assert.ok(frontierLane.has(robot) && !frontierLane.has(startup) && !frontierLane.has(indie));
+  const narrowed = await ids("lane=startup&category=indie");
+  assert.ok(narrowed.has(indie) && !narrowed.has(startup));
+  assert.equal((await get("/api/site/timeline?lane=nope")).status, 400);
 });
