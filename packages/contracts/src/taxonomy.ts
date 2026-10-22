@@ -30,11 +30,6 @@ export function isLaneKey(value: unknown): value is LaneKey {
   return typeof value === "string" && (LANE_KEYS as readonly string[]).includes(value);
 }
 
-/** The lane a category belongs to (null when no lane lists it). */
-export function laneOf(category: CategoryKey): LaneKey | null {
-  return LANE_KEYS.find((l) => LANE_CATEGORIES[l].includes(category)) ?? null;
-}
-
 export const CHANNEL_KEYS = ["all", "news", "x", "firstParty"] as const;
 export type ChannelKey = (typeof CHANNEL_KEYS)[number];
 

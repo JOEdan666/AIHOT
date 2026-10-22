@@ -2,7 +2,7 @@ import { SITE, withSubject } from "@aihot/industry/site";
 import { data as withHeaders, redirect, useLoaderData } from "react-router";
 import type { Route } from "./+types/home";
 import type { TimelineResponse } from "@aihot/contracts/site";
-import { isCategoryKey, isChannelKey, isLaneKey, LANE_LABELS } from "@aihot/contracts/taxonomy";
+import { isCategoryKey, isChannelKey, isLaneKey, LANE_CATEGORIES, LANE_LABELS } from "@aihot/contracts/taxonomy";
 import { loadOr404, queryString, releaseBoundCache } from "../lib/api.server";
 import { listPath, organizationLd, pageMeta } from "../lib/seo";
 import { Wordmark } from "../components/Logo";
@@ -22,7 +22,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   const channel = isChannelKey(channelParam) ? channelParam : "all";
   const category = categoryParam && isCategoryKey(categoryParam) ? categoryParam : null;
   const laneParam = url.searchParams.get("lane");
-  const lane = laneParam && isLaneKey(laneParam) ? laneParam : null;
+  // A category outside the chosen lane wins: the lane is dropped so the tabs match what is shown.
+  const lane = laneParam && isLaneKey(laneParam) && (!category || LANE_CATEGORIES[laneParam].includes(category)) ? laneParam : null;
   const tag = url.searchParams.get("tag")?.trim() || null;
   const upstream = new Headers();
   const data = await loadOr404<TimelineResponse>(`/api/site/timeline${queryString({ channel: channel === "all" ? null : channel, category, lane, tag })}`, { responseHeaders: upstream, signal: request.signal });

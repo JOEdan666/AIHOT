@@ -41,6 +41,8 @@ export async function seedTopics(): Promise<number> {
       ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, grp = EXCLUDED.grp, entity_id = EXCLUDED.entity_id,
         tags = EXCLUDED.tags, definition = EXCLUDED.definition, related = EXCLUDED.related, position = EXCLUDED.position`;
   }
+  // A topic the pack no longer lists goes too (its digests with it), so no page is left on dead tags.
+  await sql`DELETE FROM topics WHERE slug <> ALL(${data.topics.map((t) => t.slug)}::text[])`;
   topicsCache.clear();
   countsCache.clear();
   return data.topics.length;

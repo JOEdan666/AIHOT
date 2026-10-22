@@ -28,7 +28,7 @@ function filterSql(q: TimelineQuery) {
 }
 
 function binding(q: TimelineQuery): string {
-  return queryBinding({ c: q.channel, k: q.category, l: q.lane ?? null, t: q.tag, p: q.topic ?? null });
+  return queryBinding({ c: q.channel, k: q.category, ...(q.lane ? { l: q.lane } : {}), t: q.tag, p: q.topic ?? null });
 }
 
 /** Representative preference: first-party, full text, higher score, earliest. */

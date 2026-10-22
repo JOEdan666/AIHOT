@@ -44,7 +44,7 @@ export async function loadGroupReports(q: GroupReportsQuery, now = new Date()): 
 
   // The revision covers the actual member set; a cursor from another revision means "reload".
   const revision = shortHash(members.map((m) => m.id).join(","), 10);
-  const binding = queryBinding({ f: q.factPublicId, c: q.channel, k: q.category, l: q.lane ?? null, t: q.tag, p: q.topicTags });
+  const binding = queryBinding({ f: q.factPublicId, c: q.channel, k: q.category, ...(q.lane ? { l: q.lane } : {}), t: q.tag, p: q.topicTags });
   let offset = 0;
   if (q.cursor) {
     const c = decodeCursor<{ o: number; r: string; b: string }>("gr1", q.cursor);
@@ -129,7 +129,7 @@ export async function loadDevelopments(q: DevelopmentsQuery, now = new Date()): 
     .map((d) => d.development);
 
   const revision = shortHash(list.map((d) => `${d.factId}:${d.representativeId}:${d.reportCount}`).join(","), 10);
-  const binding = queryBinding({ s: q.storyPublicId, c: q.channel, k: q.category, l: q.lane ?? null, t: q.tag, p: q.topicTags });
+  const binding = queryBinding({ s: q.storyPublicId, c: q.channel, k: q.category, ...(q.lane ? { l: q.lane } : {}), t: q.tag, p: q.topicTags });
   let offset = 0;
   if (q.cursor) {
     const c = decodeCursor<{ o: number; r: string; b: string }>("dv1", q.cursor);
