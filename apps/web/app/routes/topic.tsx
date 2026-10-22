@@ -77,7 +77,7 @@ export default function TopicPage() {
         </div>
       </header>
 
-      {digest && (
+      {digest && page === 1 && (
         <div className="mb-4">
           <TopicDigestCard digest={digest} />
         </div>

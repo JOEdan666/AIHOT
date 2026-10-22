@@ -7,7 +7,9 @@ import { closeDb, sql } from "@aihot/backend/db";
 import { upsertMaterial } from "@aihot/backend/content/materials";
 import { publishArticle } from "@aihot/backend/publication/publish";
 import { stopBoss } from "@aihot/backend/jobs/queue";
-import { composeTopicDigest, loadTopicDigests } from "@aihot/backend/events/topic-digest";
+import { composeTopicDigest } from "@aihot/backend/events/topic-digest";
+import { loadTopicDigests } from "@aihot/backend/publication/topic-digests";
+import { setVisibility } from "@aihot/backend/admin/content";
 import { buildApp } from "../apps/api/src/app.ts";
 
 const T = tag();
@@ -87,4 +89,14 @@ test("the same items are not written again; a new item rewrites", async () => {
   assert.deepEqual(await composeTopicDigest(SLUG), { updated: true, version: 2 });
   assert.equal(requests.length, 2);
   assert.equal((await loadTopicDigests({ slug: SLUG })).length, 1, "the page reads the latest version only");
+});
+
+test("a withdrawn item hides the digest written from it, on the topic page too", async () => {
+  const [digest] = await loadTopicDigests({ slug: SLUG });
+  assert.ok(digest);
+  const [row] = await sql<{ article_ids: string[] }[]>`SELECT article_ids FROM topic_digests WHERE topic_slug = ${SLUG} ORDER BY version DESC LIMIT 1`;
+  await setVisibility(row!.article_ids[0]!, { visibility: "withdrawn", reason: "test", version: 0 }, "test");
+  assert.deepEqual(await loadTopicDigests({ slug: SLUG }), []);
+  const page = await app.inject({ method: "GET", url: `/api/site/topics/${SLUG}` });
+  assert.equal(JSON.parse(page.body).digest, null);
 });

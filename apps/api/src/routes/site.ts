@@ -16,7 +16,7 @@ import { loadContact, loadMakerAvatar } from "@aihot/backend/site/contact";
 import { loadSiteStats } from "@aihot/backend/site/stats";
 import { itemAvailability } from "@aihot/backend/publication/availability";
 import { listTopicSummaries, loadTopicPage } from "@aihot/backend/publication/topics";
-import { loadTopicDigests } from "@aihot/backend/events/topic-digest";
+import { loadTopicDigests } from "@aihot/backend/publication/topic-digests";
 import { registerFeedback } from "./feedback.ts";
 
 import { loadHot, loadStoryDetail, resolveStory } from "@aihot/backend/publication/stories";
@@ -188,8 +188,8 @@ export function registerSite(app: FastifyInstance) {
     const page = Number(looseQuery(req).page ?? 1);
     const data = Number.isInteger(page) ? await loadTopicPage(slug, page) : null;
     if (!data) return sendProblem(req, reply, { status: 404, code: "not_found", detail: "topic page not found", cacheControl: "public, max-age=60" });
-    // The last seven days in one paragraph, above the list (first page only).
-    const digest = page === 1 ? ((await loadTopicDigests({ slug }))[0] ?? null) : null;
+    // The last seven days in one paragraph: shown above the first page; every page lists its items as one line each when there is one.
+    const digest = (await loadTopicDigests({ slug }))[0] ?? null;
     return sendJsonWithEtag(req, reply, { ...data, digest }, { etagPrefix: "topic", cacheControl: "public, max-age=60, s-maxage=60" });
   }));
 

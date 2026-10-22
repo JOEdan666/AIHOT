@@ -1,6 +1,6 @@
 // Topic digest: what happened in a topic over the last seven days, as one or a few threads rather than
 // item by item. Written from the topic's selected items; rewritten only when that set or what the items
-// say has changed. Read by the topic page and the home page's topic strip.
+// say has changed. Read through publication/topic-digests.ts.
 import { z } from "zod";
 import { beijingDate } from "@aihot/contracts/time";
 import { sql } from "../db.ts";
@@ -20,8 +20,6 @@ const WINDOW_MS = 7 * 86400_000;
 export const TOPIC_DIGEST_MIN_ITEMS = 3;
 /** Topics written per run, the busiest first: bounds the paid calls of one run. */
 const TOPICS_PER_RUN = 12;
-/** A digest older than this no longer describes "the last seven days" and is not shown. */
-const SHOW_FOR_MS = 8 * 86400_000;
 
 const Schema = z.object({
   headline: z.string().min(4).max(80),
@@ -94,28 +92,4 @@ export async function composeTopicDigests(now = new Date()): Promise<{ written: 
     }
   }
   return { written, skipped, failed };
-}
-
-export interface TopicDigest {
-  slug: string;
-  name: string;
-  headline: string;
-  digest: string;
-  windowFrom: string;
-  windowTo: string;
-  itemCount: number;
-}
-
-/** The latest digest of each topic that is still current, newest first (the topic page reads one, the home strip a few). */
-export async function loadTopicDigests(opts: { slug?: string; limit?: number } = {}, now = new Date()): Promise<TopicDigest[]> {
-  const rows = await sql<{ slug: string; name: string; headline: string; digest: string; window_from: Date; window_to: Date; n: number }[]>`
-    SELECT DISTINCT ON (d.topic_slug) d.topic_slug AS slug, t.name, d.headline, d.digest, d.window_from, d.window_to,
-      cardinality(d.article_ids) AS n
-    FROM topic_digests d JOIN topics t ON t.slug = d.topic_slug
-    WHERE d.created_at > ${new Date(now.getTime() - SHOW_FOR_MS)} ${opts.slug ? sql`AND d.topic_slug = ${opts.slug}` : sql``}
-    ORDER BY d.topic_slug, d.version DESC`;
-  return rows
-    .sort((a, b) => b.window_to.getTime() - a.window_to.getTime() || b.n - a.n)
-    .slice(0, opts.limit ?? rows.length)
-    .map((r) => ({ slug: r.slug, name: r.name, headline: r.headline, digest: r.digest, windowFrom: r.window_from.toISOString(), windowTo: r.window_to.toISOString(), itemCount: r.n }));
 }
