@@ -1,5 +1,5 @@
 {
-  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里增删改、试抓。X 信源需要 SOCIALDATA_API_KEY，默认停用。YouTube 频道 id、个人网站的订阅地址上线后请先在后台试抓确认。字段说明见 docs/customize.md。 YC 批次信源读的是 yc-oss 的非官方镜像，每季新批次开始后把地址里的批次名（如 fall-2026）换成新的。",
+  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里增删改、试抓。默认只开三类：YC（本批次公司 + YC 频道）、国内创业论坛与媒体（V2EX 分享创造、36氪、虎嗅、人人都是产品经理）、X（需要 SOCIALDATA_API_KEY，默认停用）。其余 AI、机器人、媒体类信源保留但停用，需要时在后台打开。订阅地址上线后请先在后台试抓确认。YC 批次信源读的是 yc-oss 的非官方镜像，每季新批次开始后把地址里的批次名（如 fall-2026）换成新的。",
   "sources": [
     {
       "id": "rss-openai-news",
@@ -20,7 +20,8 @@
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-google-deepmind",
@@ -41,7 +42,8 @@
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-google-research",
@@ -63,7 +65,8 @@
         "研究"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-hugging-face",
@@ -85,7 +88,8 @@
         "开源"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-microsoft-research",
@@ -107,7 +111,8 @@
         "研究"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-nvidia-blog",
@@ -128,7 +133,8 @@
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-aws-ml",
@@ -150,7 +156,8 @@
         "教程"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-github-ai",
@@ -171,7 +178,8 @@
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-mistral",
@@ -192,7 +200,8 @@
         "官方"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-bair",
@@ -213,7 +222,8 @@
         "研究"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-the-verge-ai",
@@ -234,7 +244,8 @@
         "媒体"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-techcrunch-ai",
@@ -255,7 +266,8 @@
         "媒体"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-ars-technica-ai",
@@ -276,7 +288,8 @@
         "媒体"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-mit-tech-review-ai",
@@ -297,7 +310,8 @@
         "媒体"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-the-decoder",
@@ -318,7 +332,8 @@
         "媒体"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-simon-willison",
@@ -339,7 +354,8 @@
         "个人"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-import-ai",
@@ -361,7 +377,8 @@
         "周刊"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-latent-space",
@@ -382,7 +399,8 @@
         "个人"
       ],
       "site_fulltext": false,
-      "syndicate_fulltext": false
+      "syndicate_fulltext": false,
+      "enabled": false
     },
     {
       "id": "rss-ieee-spectrum-robotics",
@@ -405,7 +423,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-the-robot-report",
@@ -428,7 +446,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-lerobot-releases",
@@ -451,7 +469,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-quanta",
@@ -474,7 +492,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-mit-tech-review",
@@ -497,7 +515,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-hn-show",
@@ -521,7 +539,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-product-hunt",
@@ -544,7 +562,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-techcrunch-startups",
@@ -567,7 +585,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-karpathy",
@@ -589,7 +607,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-sam-altman",
@@ -611,7 +629,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "rss-interconnects",
@@ -633,7 +651,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "yt-y-combinator",
@@ -679,7 +697,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "yt-lex-fridman",
@@ -702,7 +720,7 @@
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "x-ai-researchers",
@@ -795,6 +813,88 @@
       "tags": [
         "创业",
         "YC"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "rss-v2ex-create",
+      "name": "V2EX · 分享创造",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.v2ex.com/feed/create.xml"
+      },
+      "tier": "T2",
+      "first_party": false,
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "国内",
+        "创业",
+        "论坛"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "rss-36kr",
+      "name": "36氪",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://36kr.com/feed"
+      },
+      "tier": "T2",
+      "first_party": false,
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "国内",
+        "创业"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "rss-huxiu",
+      "name": "虎嗅",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.huxiu.com/rss/0.xml"
+      },
+      "tier": "T2",
+      "first_party": false,
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "国内",
+        "创业"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
+    },
+    {
+      "id": "rss-woshipm",
+      "name": "人人都是产品经理",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.woshipm.com/feed"
+      },
+      "tier": "T2",
+      "first_party": false,
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "国内",
+        "创业",
+        "产品"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false,

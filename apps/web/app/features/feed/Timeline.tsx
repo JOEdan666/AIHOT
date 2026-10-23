@@ -47,7 +47,7 @@ export function DayHeader({ day, today, count, collapsed, onToggle }: { day: str
   const weekday = beijingWeekday(day);
   const short = WEEKDAY_SHORT[new Date(`${day}T12:00:00+08:00`).getUTCDay()] ?? "";
   return (
-    <div className="sticky top-0 z-20 -mx-4 bg-daybar px-4 lg:mx-0 lg:bg-bg lg:px-0">
+    <div className="sticky top-0 z-20 -mx-4 bg-daybar backdrop-blur-xl px-4 lg:mx-0 lg:bg-bg lg:backdrop-blur-none lg:px-0">
       {/* Phones: a full-width day bar. */}
       <div className="flex h-9 items-center gap-2 lg:hidden">
         <span className="text-[14px] font-bold text-ink">{day === today ? "今天" : date}</span>

@@ -7,9 +7,8 @@ import { loadOr404, queryString, releaseBoundCache } from "../lib/api.server";
 import { listPath, organizationLd, pageMeta } from "../lib/seo";
 import { Wordmark } from "../components/Logo";
 import { Timeline } from "../features/feed/Timeline";
-import { HotTopics } from "../features/feed/HotTopics";
 import { TopicDigests } from "../features/feed/TopicDigests";
-import { CategoryTabs, LaneTabs, SearchField, SearchIconLink } from "../features/feed/Filters";
+import { LaneTabs } from "../features/feed/Filters";
 import { beijingDate, beijingWeekday } from "../lib/format";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -52,32 +51,20 @@ function TodayLabel() {
 
 export default function Home() {
   const { data, filters } = useLoaderData<typeof loader>();
-  const title = filters.tag ? `#${filters.tag}` : filters.lane ? LANE_LABELS[filters.lane] : "精选";
+  const title = filters.tag ? `#${filters.tag}` : filters.lane ? LANE_LABELS[filters.lane] : "本周";
   return (
     <div className="pb-6">
-      {/* Phones: brand bar, today's hot topics, then the feed under "最新精选". */}
+      {/* Phones: brand bar, this week's topic threads, then the feed. */}
       <div className="flex h-14 items-center justify-between lg:hidden">
         <Wordmark size={20} className="text-ink" />
         <TodayLabel />
       </div>
-      <div className="hidden lg:block">
-        <h1 className="text-[24px] font-semibold leading-[1.3] text-ink">{title}</h1>
-        <LaneTabs base="/" lane={filters.lane} layoutId="home-lane-desk" className="mt-4" />
-        <div className="mb-5 mt-3 flex items-center justify-between gap-4">
-          <CategoryTabs base="/" category={filters.category} channel={filters.channel} lane={filters.lane} layoutId="home-cat-desk" className="min-w-0" />
-          <SearchField variant="track" keep={{ category: filters.category }} />
-        </div>
-      </div>
+      <h1 className="hidden text-[28px] font-semibold leading-[1.3] tracking-tight text-ink lg:block">{title}</h1>
 
-      {data.hot && <HotTopics entries={data.hot} />}
       {data.topicDigests && <TopicDigests entries={data.topicDigests} />}
 
-      <h2 className="mt-6 text-[20px] font-bold text-ink lg:hidden">{filters.tag ? title : filters.lane ? title : "最新精选"}</h2>
-      <LaneTabs base="/" lane={filters.lane} layoutId="home-lane-mobile" size="sm" className="mt-3 lg:hidden" />
-      <div className="-mx-4 mt-2 flex items-center gap-2 pl-4 pr-2 lg:hidden">
-        <CategoryTabs base="/" category={filters.category} channel={filters.channel} lane={filters.lane} layoutId="home-cat-mobile" size="sm" className="min-w-0 flex-1" />
-        <SearchIconLink />
-      </div>
+      <h2 className="mt-6 text-[20px] font-bold tracking-tight text-ink">{filters.tag || filters.lane ? title : "最新动态"}</h2>
+      <LaneTabs base="/" lane={filters.lane} layoutId="home-lane" size="sm" className="mb-2 mt-3" />
 
       <Timeline initial={data} filters={data.filters} />
     </div>

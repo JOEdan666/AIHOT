@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   AIHOT design tokens — the look of the original site: warm off-white paper,
-   ink text, one teal accent (cyan in dark), hairline borders, no gradients.
+   Idea Storm design tokens — minimal and glassy, after iOS: a soft colour wash behind
+   translucent, blurred surfaces, thin light borders, generous radii, one teal accent.
    Components use the semantic names below; values change per theme only.
    --------------------------------------------------------------------------- */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
   /* Brand (VI), fixed across themes. */
@@ -66,11 +66,11 @@
      blocks), tile 10 (list rows, hover areas), card 12, panel 14 (wells, pictures), sheet 16 (dialogs,
      sheets, hero shells); pills are rounded-full. Arbitrary radii are not used. */
   --radius-mark: 5px;
-  --radius-control: 8px;
-  --radius-tile: 10px;
-  --radius-card: 12px;
-  --radius-panel: 14px;
-  --radius-sheet: 16px;
+  --radius-control: 12px;
+  --radius-tile: 16px;
+  --radius-card: 22px;
+  --radius-panel: 22px;
+  --radius-sheet: 28px;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 
@@ -90,22 +90,25 @@
   --page-max-wide: max(1200px, calc(270dvh - 236px));
   --page-max-reading: max(1100px, calc(200dvh - 236px));
   color-scheme: light;
-  --bg: #faf9f6;
-  --bg-sunk: #f3f3ef;
-  --bg-muted: #e9ede9;
-  --surface: #ffffff;
-  --surface-2: #fdfdfb;
-  --raised: #ffffff;
-  --sidebar: #fdfdfb;
-  --daybar: #f0f2ee;
-  --field: #eef1ed;
+  --bg: #f2f4f8;
+  --bg-image: radial-gradient(60rem 40rem at 8% -10%, rgba(120, 170, 255, 0.34), transparent 60%), radial-gradient(50rem 36rem at 100% 0%, rgba(190, 150, 255, 0.26), transparent 60%), radial-gradient(48rem 40rem at 70% 105%, rgba(255, 190, 150, 0.26), transparent 60%);
+  --bg-sunk: rgba(255, 255, 255, 0.4);
+  --bg-muted: rgba(120, 130, 150, 0.14);
+  --surface: rgba(255, 255, 255, 0.58);
+  --surface-2: rgba(255, 255, 255, 0.5);
+  --raised: rgba(255, 255, 255, 0.8);
+  --sidebar: rgba(255, 255, 255, 0.45);
+  --daybar: rgba(255, 255, 255, 0.45);
+  --field: rgba(120, 130, 150, 0.12);
+  --glass-blur: blur(26px) saturate(180%);
+  --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.75);
   --ink: #202a30;
   --ink-2: #303c42;
   --ink-3: #59656b;
   --ink-4: #657176;
-  --line: #dfe4e1;
-  --line-strong: #d1d9d5;
-  --line-soft: #e9ede9;
+  --line: rgba(255, 255, 255, 0.7);
+  --line-strong: rgba(60, 70, 90, 0.16);
+  --line-soft: rgba(60, 70, 90, 0.08);
   --accent: #176b75;
   --accent-ink: #145f68;
   --accent-soft: rgba(23, 107, 117, 0.08);
@@ -131,8 +134,8 @@
   --rank-2: #a3642f;
   --rank-3: #96702e;
   --rank-rest: #6b7684;
-  --shadow-card: 0 1px 2px rgba(32, 42, 48, 0.025);
-  --shadow-card-hover: 0 3px 12px rgba(32, 42, 48, 0.055);
+  --shadow-card: 0 8px 28px rgba(40, 60, 100, 0.08), 0 1px 2px rgba(40, 60, 100, 0.06);
+  --shadow-card-hover: 0 12px 34px rgba(40, 60, 100, 0.13), 0 1px 2px rgba(40, 60, 100, 0.06);
   --shadow-soft: 0 4px 12px rgba(28, 39, 51, 0.06);
   --shadow-thumb: 0 1px 2px rgba(28, 39, 51, 0.1), 0 1px 1px rgba(28, 39, 51, 0.04);
   --shadow-pop: 0 12px 32px rgba(28, 39, 51, 0.12);
@@ -143,22 +146,24 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #13191c;
-  --bg-sunk: #182024;
-  --bg-muted: #202a2f;
-  --surface: #1a2226;
-  --surface-2: #1d272b;
-  --raised: #202a2f;
-  --sidebar: #161e21;
-  --daybar: #182024;
-  --field: rgba(255, 255, 255, 0.06);
+  --bg: #0c1018;
+  --bg-image: radial-gradient(60rem 40rem at 8% -10%, rgba(60, 110, 220, 0.34), transparent 60%), radial-gradient(50rem 36rem at 100% 0%, rgba(130, 80, 220, 0.26), transparent 60%), radial-gradient(48rem 40rem at 70% 105%, rgba(20, 150, 170, 0.22), transparent 60%);
+  --bg-sunk: rgba(255, 255, 255, 0.05);
+  --bg-muted: rgba(255, 255, 255, 0.1);
+  --surface: rgba(255, 255, 255, 0.07);
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --raised: rgba(255, 255, 255, 0.12);
+  --sidebar: rgba(255, 255, 255, 0.05);
+  --daybar: rgba(255, 255, 255, 0.05);
+  --field: rgba(255, 255, 255, 0.08);
+  --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.12);
   --ink: #e7eceb;
   --ink-2: #d2dada;
   --ink-3: #a5b0b3;
   --ink-4: #89979d;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.12);
-  --line-soft: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.14);
+  --line-strong: rgba(255, 255, 255, 0.2);
+  --line-soft: rgba(255, 255, 255, 0.08);
   --accent: #12ccd8;
   --accent-ink: #2ce2e8;
   --accent-soft: rgba(18, 204, 216, 0.12);
@@ -178,8 +183,8 @@
   --rank-2: #d18a5e;
   --rank-3: #d3b26a;
   --rank-rest: #7b869a;
-  --shadow-card: none;
-  --shadow-card-hover: none;
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 14px 38px rgba(0, 0, 0, 0.4);
   --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.35);
   --shadow-thumb: 0 1px 2px rgba(0, 0, 0, 0.45);
   --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.45);
@@ -197,7 +202,8 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    background: var(--bg);
+    background: var(--bg-image), var(--bg);
+    background-attachment: fixed;
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: 14px;
@@ -298,7 +304,17 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--glass-edge), var(--shadow-card);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+/* A floating glass bar or sheet (tab bar, sticky headers). */
+@utility glass {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--glass-edge), var(--shadow-soft);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 /* The well: a quiet sunk panel for what navigates or annotates rather than reads (the report's 报眼,
    the hot lead's heat panel, notes on about and feedback). Radius is set where it is used. */

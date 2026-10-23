@@ -34,7 +34,7 @@ export function Menu({ trigger, label, children, align = "right" }: { trigger: R
       <Presence show={open} enter="anim-drop-in" exit="anim-drop-out" duration={140}>
         <div
           role="menu"
-          className={`absolute top-10 z-50 min-w-[168px] overflow-hidden rounded-tile border border-line bg-raised py-1 shadow-[var(--shadow-pop)] ${align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left"}`}
+          className={`absolute top-10 z-50 min-w-[168px] overflow-hidden rounded-tile border border-line bg-raised backdrop-blur-xl py-1 shadow-[var(--shadow-pop)] ${align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left"}`}
         >
           {children(() => setOpen(false))}
         </div>
