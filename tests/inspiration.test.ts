@@ -10,7 +10,9 @@ import { upsertMaterial } from "@aihot/backend/content/materials";
 import { publishArticle } from "@aihot/backend/publication/publish";
 import { stopBoss } from "@aihot/backend/jobs/queue";
 import { sha256 } from "@aihot/backend/lib/ids";
-import { composeWeeklyReview, loadWeeklyReview, updateReviewAction, weekStartOf } from "@aihot/backend/inspiration/review";
+import { composeWeeklyReview, loadWeeklyReview, ReviewModelError, updateReviewAction, weekStartOf } from "@aihot/backend/inspiration/review";
+import { scheduleWeeklyReviews } from "@aihot/backend/jobs/inspiration";
+import { addDays } from "@aihot/contracts/time";
 import { buildApp } from "../apps/api/src/app.ts";
 
 const T = tag();
@@ -84,6 +86,7 @@ test("notes need a session and CSRF, and stay with their owner", async () => {
   // As the admin page sends it: no body, so no content-type.
   const bobDelete = await app.inject({ method: "DELETE", url: `/api/admin/notes/${note.id}`, headers: { cookie: bob.headers.cookie, "x-csrf-token": bob.headers["x-csrf-token"]! } });
   assert.equal(bobDelete.statusCode, 404);
+  assert.equal((await call(alice, "PATCH", "/api/admin/notes/abc", { body: "x" })).statusCode, 404, "a bad id is not found, not a server error");
   const edited = await call(alice, "PATCH", `/api/admin/notes/${note.id}`, { body: "诊所真的缺人手吗" });
   assert.equal(JSON.parse(edited.body).body, "诊所真的缺人手吗");
 });
@@ -113,12 +116,15 @@ test("an edited next action survives regeneration; with the model unavailable th
   await call(alice, "POST", "/api/admin/notes", { kind: "thought", body: "也许先做软件版" });
   modelDown = true;
   try {
-    const again = await composeWeeklyReview(alice.owner);
+    // The lists are saved, then the failure is thrown so the queued job retries.
+    await assert.rejects(composeWeeklyReview(alice.owner), ReviewModelError);
+    const again = (await loadWeeklyReview(alice.owner))!;
     assert.equal(again.nextAction, "我自己定的行动");
     assert.equal(again.actionDone, true);
     assert.deepEqual(again.connections, []);
     await sql`UPDATE weekly_reviews SET action_edited = false, action_done = false WHERE owner = ${alice.owner}`;
-    const plain = await composeWeeklyReview(alice.owner);
+    await assert.rejects(composeWeeklyReview(alice.owner), ReviewModelError);
+    const plain = (await loadWeeklyReview(alice.owner))!;
     assert.ok(plain.nextAction.includes("诊所真的缺人手吗"), "falls back to the owner's own objection");
   } finally {
     modelDown = false;
@@ -132,4 +138,26 @@ test("generating from the admin page queues one job instead of calling the model
   assert.equal(asks.length, before, "no model call in the request");
   const [job] = await sql<{ n: number }[]>`SELECT count(*)::int AS n FROM pgboss.job WHERE name = 'inspiration.review' AND data->>'owner' = ${alice.owner}`;
   assert.equal(job!.n, 1);
+});
+
+test("an item noted long ago is still listed among the noted ones", async () => {
+  await sql`UPDATE publications SET timeline_at = now() - interval '90 days' WHERE article_id = ${items[0]}`;
+  const recent = JSON.parse((await call(alice, "GET", "/api/admin/desk?days=30")).body) as { items: Array<{ id: string }> };
+  assert.ok(!recent.items.some((i) => i.id === items[0]));
+  const noted = JSON.parse((await call(alice, "GET", "/api/admin/desk?noted=1")).body) as { items: Array<{ id: string; notes: unknown[] }> };
+  assert.ok(noted.items.some((i) => i.id === items[0] && i.notes.length > 0));
+});
+
+test("Monday's schedule reviews the week just ended, under that week's Monday", async () => {
+  const lastWeek = addDays(weekStartOf(new Date()), -7);
+  const [note] = await sql<{ id: number }[]>`
+    INSERT INTO notes (owner, kind, body, created_at) VALUES (${bob.owner}, 'objection', '上周的反对意见', ${new Date(Date.parse(`${lastWeek}T12:00:00+08:00`))}) RETURNING id`;
+  assert.ok(note);
+  await scheduleWeeklyReviews();
+  const jobs = await sql<{ data: { owner: string; weekStart?: string } }[]>`SELECT data FROM pgboss.job WHERE name = 'inspiration.review' AND data->>'owner' = ${bob.owner}`;
+  assert.deepEqual(jobs.map((j) => j.data.weekStart), [lastWeek]);
+  const review = await composeWeeklyReview(bob.owner, { weekStart: lastWeek });
+  assert.equal(review.weekStart, lastWeek);
+  assert.deepEqual(review.objections.map((o) => o.body), ["上周的反对意见"]);
+  assert.equal((await composeWeeklyReview(bob.owner)).objections.length, 0, "this week's review does not take last week's notes");
 });

@@ -37,13 +37,15 @@ function decodeImage(dataUrl: unknown): Buffer {
 
 /** The signed-in owner of an inspiration notebook. */
 const ownerOf = (admin: { userId: number | null }) => `admin:${admin.userId ?? "dev"}`;
+/** A note id from the path; anything but a positive integer reads as not found. */
+const noteId = (req: FastifyRequest) => (/^[1-9]\d{0,15}$/.test(param(req, "id")) ? Number(param(req, "id")) : null);
 
 export function registerAdmin(app: FastifyInstance) {
   // Inspiration notebook: the signed-in owner's own notes and weekly review (private to them).
-  app.get("/api/admin/desk", adminHandler(async (req, _reply, admin) => loadDesk(ownerOf(admin), { days: Math.min(30, Number(q(req).days) || 7), noted: q(req).noted === "1" })));
+  app.get("/api/admin/desk", adminHandler(async (req, _reply, admin) => loadDesk(ownerOf(admin), { days: Math.min(30, Math.max(1, Number(q(req).days) || 7)), noted: q(req).noted === "1" })));
   app.post("/api/admin/notes", adminHandler(async (req, _reply, admin) => addNote(ownerOf(admin), body(req))));
-  app.patch("/api/admin/notes/:id", adminHandler(async (req, reply, admin) => orNotFound(req, reply, await updateNote(ownerOf(admin), Number(param(req, "id")), body(req)))));
-  app.delete("/api/admin/notes/:id", adminHandler(async (req, reply, admin) => orNotFound(req, reply, await deleteNote(ownerOf(admin), Number(param(req, "id"))))));
+  app.patch("/api/admin/notes/:id", adminHandler(async (req, reply, admin) => orNotFound(req, reply, noteId(req) === null ? null : await updateNote(ownerOf(admin), noteId(req)!, body(req)))));
+  app.delete("/api/admin/notes/:id", adminHandler(async (req, reply, admin) => orNotFound(req, reply, noteId(req) === null ? null : await deleteNote(ownerOf(admin), noteId(req)!))));
   app.get("/api/admin/review", adminHandler(async (_req, _reply, admin) => ({ review: await loadWeeklyReview(ownerOf(admin)) })));
   app.post("/api/admin/review/generate", adminHandler(async (_req, _reply, admin) => ({ queued: !!(await requestWeeklyReview(ownerOf(admin))) })));
   app.patch("/api/admin/review", adminHandler(async (req, reply, admin) => orNotFound(req, reply, await updateReviewAction(ownerOf(admin), body(req)))));

@@ -3,12 +3,12 @@
 // connections and one small next action written by the model from those notes and the week's topic
 // digests. Composed in a worker job; the admin page only reads it.
 import { z } from "zod";
-import { addDays, beijingDate } from "@aihot/contracts/time";
+import { addDays, beijingDate, beijingMidnight } from "@aihot/contracts/time";
+import { config } from "../config.ts";
 import { sql } from "../db.ts";
 import { modelFor } from "../editorial/models.ts";
 import { promptText, promptVersion } from "../editorial/prompts.ts";
 import { loadTopicDigests } from "../publication/topic-digests.ts";
-import { sha256, stableJson } from "../lib/ids.ts";
 import { chatJson } from "../providers/llm.ts";
 import { completeReceipt } from "../providers/receipts.ts";
 import { listTopics, topicMatchTags } from "../publication/topics.ts";
@@ -49,13 +49,22 @@ function fallbackAction(recurring: WeeklyReview["recurring"], objections: Review
   return "这周记下的判断还不多。挑一条最让你在意的内容，写一句你同不同意、为什么。";
 }
 
-export async function composeWeeklyReview(owner: string, now = new Date()): Promise<WeeklyReview> {
-  const weekStart = weekStartOf(now);
-  const since = new Date(now.getTime() - 7 * 86400_000);
+export class ReviewModelError extends Error {}
+
+/**
+ * The review of one calendar week (Monday to Sunday, Beijing time): `weekStart` given, that week (the
+ * Monday schedule reviews the week just ended); otherwise the current week so far. The lists and the
+ * plain next action are written even when the model call fails; the failure is then thrown, so the
+ * job retries and a later attempt can add the connections.
+ */
+export async function composeWeeklyReview(owner: string, opts: { weekStart?: string } = {}, now = new Date()): Promise<WeeklyReview> {
+  const weekStart = opts.weekStart ?? weekStartOf(now);
+  const since = beijingMidnight(weekStart);
+  const until = new Date(Math.min(now.getTime(), beijingMidnight(addDays(weekStart, 7)).getTime()));
   const notes = await sql<{ id: string; kind: NoteKind; body: string; article_id: string | null; title: string | null; tags: string[] | null }[]>`
     SELECT n.id, n.kind, n.body, n.article_id, p.title, p.tags
     FROM notes n LEFT JOIN publications p ON p.article_id = n.article_id
-    WHERE n.owner = ${owner} AND n.created_at > ${since} AND n.created_at <= ${now}
+    WHERE n.owner = ${owner} AND n.created_at >= ${since} AND n.created_at < ${until}
     ORDER BY n.created_at`;
 
   const topics = await listTopics();
@@ -77,9 +86,10 @@ export async function composeWeeklyReview(owner: string, now = new Date()): Prom
   let connections: WeeklyReview["connections"] = [];
   let nextAction = fallbackAction(recurring, objections);
   let receiptId: number | null = null;
-  if (notes.length > 0) {
+  let modelError: unknown = null;
+  if (notes.length > 0 && config.modelCallsEnabled) {
     try {
-      const digests = await loadTopicDigests({ limit: 6 }, now);
+      const digests = await loadTopicDigests({ limit: 6 }, until);
       const label: Record<NoteKind, string> = { thought: "想法", changed_mind: "改变看法", objection: "反对意见" };
       const user = [
         "我这一周写下的判断：",
@@ -89,16 +99,15 @@ export async function composeWeeklyReview(owner: string, now = new Date()): Prom
         ...(digests.length ? digests.map((d) => `- ${d.name}：${d.headline}。${d.digest}`) : ["（暂无）"]),
       ].join("\n");
       const res = await chatJson({
-        // The subject names what the answer was written from, so changed notes get a fresh answer.
-        model: await modelFor("report"), purpose: "weekly_connections",
-        subject: `review:${owner}@${weekStart}#${sha256(stableJson(notes.map((n) => [n.id, n.kind, n.body]))).slice(0, 12)}`, promptVersion: CONNECTIONS_PROMPT_VERSION,
+        // Asked again only when the notes changed: the receipt's idempotency follows the request text.
+        model: await modelFor("report"), purpose: "weekly_connections", subject: `review:${owner}@${weekStart}`, promptVersion: CONNECTIONS_PROMPT_VERSION,
         system: SYSTEM, user, schema: Schema, temperature: 0.4, maxTokens: 900,
       });
       connections = res.data.connections;
       nextAction = res.data.nextAction;
       receiptId = res.receiptId;
     } catch (error) {
-      console.error(`weekly review connections for ${owner} skipped:`, error instanceof Error ? error.message : error);
+      modelError = error;
     }
   }
 
@@ -113,6 +122,7 @@ export async function composeWeeklyReview(owner: string, now = new Date()): Prom
         next_action = CASE WHEN weekly_reviews.action_edited OR weekly_reviews.action_done THEN weekly_reviews.next_action ELSE EXCLUDED.next_action END`;
     if (receiptId !== null) await completeReceipt(tx, receiptId);
   });
+  if (modelError) throw new ReviewModelError(`connections not written: ${modelError instanceof Error ? modelError.message : String(modelError)}`, { cause: modelError });
   return (await loadWeeklyReview(owner, weekStart))!;
 }
 
@@ -146,8 +156,9 @@ export async function updateReviewAction(owner: string, input: unknown): Promise
   return res.count ? loadWeeklyReview(owner, weekStart) : null;
 }
 
-/** Owners who wrote anything in the last seven days (the weekly schedule reviews each of them). */
-export async function activeOwners(now = new Date()): Promise<string[]> {
-  const rows = await sql<{ owner: string }[]>`SELECT DISTINCT owner FROM notes WHERE created_at > ${new Date(now.getTime() - 7 * 86400_000)}`;
+/** Owners who wrote anything in the week starting `weekStart` (the weekly schedule reviews each of them). */
+export async function activeOwners(weekStart: string): Promise<string[]> {
+  const rows = await sql<{ owner: string }[]>`
+    SELECT DISTINCT owner FROM notes WHERE created_at >= ${beijingMidnight(weekStart)} AND created_at < ${beijingMidnight(addDays(weekStart, 7))}`;
   return rows.map((r) => r.owner);
 }
