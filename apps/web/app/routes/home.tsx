@@ -59,7 +59,7 @@ export default function Home() {
         <Wordmark size={20} className="text-ink" />
         <TodayLabel />
       </div>
-      <h1 className="hidden text-[28px] font-semibold leading-[1.3] tracking-tight text-ink lg:block">{title}</h1>
+      <h1 className="hidden text-[28px] font-semibold leading-[1.3] tracking-tight text-ink lg:mb-5 lg:block">{title}</h1>
 
       {data.topicDigests && <TopicDigests entries={data.topicDigests} />}
 
