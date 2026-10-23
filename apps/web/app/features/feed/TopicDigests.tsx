@@ -35,7 +35,7 @@ export function TopicDigests({ entries }: { entries: TopicDigestEntry[] }) {
   return (
     <section aria-labelledby="topic-threads" className="mb-6">
       <div className="mb-2 flex items-baseline justify-between">
-        <h2 id="topic-threads" className="text-[14px] font-semibold text-ink">本周主题线索</h2>
+        <h2 id="topic-threads" className="text-[13px] font-medium text-ink-3">主题线索</h2>
         <Link to="/topics" className="text-[12.5px] text-ink-4">
           全部主题
         </Link>
