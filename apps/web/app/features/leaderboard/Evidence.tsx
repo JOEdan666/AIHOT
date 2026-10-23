@@ -28,7 +28,7 @@ export function EvidenceBadge({ confidence, stability, rank }: { confidence: LbC
       {moved && (
         <span
           role="tooltip"
-          className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 hidden w-56 -translate-x-1/2 rounded-tile border border-line bg-raised p-3 text-left text-[12px] leading-relaxed text-ink-2 opacity-0 shadow-[var(--shadow-pop)] transition-opacity duration-150 group-hover/tip:opacity-100 group-focus/tip:opacity-100 md:block"
+          className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 hidden w-56 -translate-x-1/2 rounded-tile border border-line bg-raised backdrop-blur-xl p-3 text-left text-[12px] leading-relaxed text-ink-2 opacity-0 shadow-[var(--shadow-pop)] transition-opacity duration-150 group-hover/tip:opacity-100 group-focus/tip:opacity-100 md:block"
         >
           <span className="block text-[11px] text-ink-4">名次浮动范围</span>
           <span className="num block text-[15px] font-semibold text-ink">{rangeText(stability)}</span>
