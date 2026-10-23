@@ -5,6 +5,7 @@
 // its HTML: read without its adapter, it gave the menu (MiMo Desktop, 简体中文) as articles.
 import "./setup.ts";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import http from "node:http";
 import { after, test } from "node:test";
 import { config } from "@aihot/backend/config";
@@ -38,6 +39,12 @@ const pages: Record<string, (cdn: string) => string> = {
     `<content type="html"><![CDATA[<p>${"The feed carries this post whole, paragraph after paragraph. ".repeat(30)}</p>]]></content></entry></feed>`,
   // A list API that gives calendar days as yyyymmdd.
   "/days.json": () => JSON.stringify({ data: { list: [{ seq: 695, ttl: "MCFlow", day: "20260922" }, { seq: 1, ttl: "Bad day", day: "20260230" }] } }),
+  // yc-oss's batch file (fall-2026.json as served on 2026-10-23), cut down to one company and one without a long description.
+  "/yc.json": () =>
+    JSON.stringify([
+      { id: 30290, name: "Tire Swing", slug: "tire-swing", one_liner: "AI Compliance for Affordable Housing", long_description: "Tire Swing automates compliance work for affordable housing operators.", launched_at: 1740473580, url: "https://www.ycombinator.com/companies/tire-swing", batch: "Fall 2026" },
+      { id: 30291, name: "Short Co", slug: "short-co", one_liner: "Only a one-liner", long_description: "", launched_at: 1792683015, url: "https://www.ycombinator.com/companies/short-co", batch: "Fall 2026" },
+    ]),
   // Google Developers Blog: no date in the feed or in meta tags, only in JSON-LD.
   "/ld-post": () =>
     `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"Blog"},` +
@@ -209,4 +216,18 @@ test("dates in yyyymmdd and in JSON-LD are read", async () => {
   assert.deepEqual(days.map((c) => c.publishedAt?.toISOString() ?? null), ["2026-09-22T00:00:00.000Z", null], "February 30 is no date");
   const got = await fetchDetail(`${site}/ld-post`, { id: "test-feed", config: { detail: { maxFetches: 20 } } } as never, { date: true, title: false, summary: false, body: false });
   assert.equal(got.publishedAt?.toISOString(), "2026-09-24T00:00:00.000Z");
+});
+
+test("the YC batch source reads companies with their page, description and launch date", async () => {
+  const { sources } = JSON.parse(readFileSync(new URL("../industry/sources.json", import.meta.url), "utf8")) as { sources: { id: string; kind: string; config: Record<string, unknown> }[] };
+  const yc = sources.find((s) => s.id.startsWith("json-yc-"))!;
+  assert.deepEqual(unsupportedConfig("json_list", yc.config), []);
+  const got = await fetchJsonList({ id: yc.id, config: { ...yc.config, url: `${site}/yc.json` } } as never);
+  assert.deepEqual(
+    got.map((c) => [c.title, c.url, c.excerpt, c.bodyStatus, c.publishedAt?.toISOString()]),
+    [
+      ["Tire Swing", "https://www.ycombinator.com/companies/tire-swing", "Tire Swing automates compliance work for affordable housing operators.", "ok", "2025-02-25T08:53:00.000Z"],
+      ["Short Co", "https://www.ycombinator.com/companies/short-co", "Only a one-liner", "ok", "2026-10-22T15:30:15.000Z"],
+    ],
+  );
 });

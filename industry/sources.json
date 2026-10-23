@@ -1,5 +1,5 @@
 {
-  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里增删改、试抓。X 信源需要 SOCIALDATA_API_KEY，默认停用。YouTube 频道 id、个人网站的订阅地址上线后请先在后台试抓确认。字段说明见 docs/customize.md。",
+  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里增删改、试抓。X 信源需要 SOCIALDATA_API_KEY，默认停用。YouTube 频道 id、个人网站的订阅地址上线后请先在后台试抓确认。字段说明见 docs/customize.md。 YC 批次信源读的是 yc-oss 的非官方镜像，每季新批次开始后把地址里的批次名（如 fall-2026）换成新的。",
   "sources": [
     {
       "id": "rss-openai-news",
@@ -763,6 +763,42 @@
       "site_fulltext": false,
       "syndicate_fulltext": false,
       "enabled": false
+    },
+    {
+      "id": "json-yc-fall-2026",
+      "name": "Y Combinator · Fall 2026 批次公司",
+      "kind": "json_list",
+      "config": {
+        "url": "https://yc-oss.github.io/api/batches/fall-2026.json",
+        "titlePaths": [
+          "name"
+        ],
+        "summaryPaths": [
+          "long_description",
+          "one_liner"
+        ],
+        "publishedAtPath": "launched_at",
+        "publishedAtUnit": "epoch_s",
+        "externalIdPath": "id",
+        "urlTemplate": "https://www.ycombinator.com/companies/{slug}",
+        "summaryIsBody": true,
+        "sortByPublishedAt": true,
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "owner_entity_id": "y-combinator",
+      "participation_mode": "editorial",
+      "interval_minutes": 720,
+      "tags": [
+        "创业",
+        "YC"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": true
     }
   ]
 }

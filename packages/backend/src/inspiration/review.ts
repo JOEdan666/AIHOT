@@ -60,11 +60,14 @@ export class ReviewModelError extends Error {}
 export async function composeWeeklyReview(owner: string, opts: { weekStart?: string } = {}, now = new Date()): Promise<WeeklyReview> {
   const weekStart = opts.weekStart ?? weekStartOf(now);
   const since = beijingMidnight(weekStart);
-  const until = new Date(Math.min(now.getTime(), beijingMidnight(addDays(weekStart, 7)).getTime()));
+  const weekEnd = beijingMidnight(addDays(weekStart, 7));
+  const until = new Date(Math.min(now.getTime(), weekEnd.getTime()));
+  // Notes are bounded by the week, not by now: a Date has whole milliseconds, created_at microseconds, so a
+  // note written in the same millisecond would otherwise be left out.
   const notes = await sql<{ id: string; kind: NoteKind; body: string; article_id: string | null; title: string | null; tags: string[] | null }[]>`
     SELECT n.id, n.kind, n.body, n.article_id, p.title, p.tags
     FROM notes n LEFT JOIN publications p ON p.article_id = n.article_id
-    WHERE n.owner = ${owner} AND n.created_at >= ${since} AND n.created_at < ${until}
+    WHERE n.owner = ${owner} AND n.created_at >= ${since} AND n.created_at < ${weekEnd}
     ORDER BY n.created_at`;
 
   const topics = await listTopics();
