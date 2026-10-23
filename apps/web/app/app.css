@@ -10,6 +10,10 @@
 
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+  /* Titles one step lighter than the default 700: the glass look reads better with soft type. */
+  --font-weight-bold: 600;
+  --font-weight-semibold: 550;
+
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
   /* Brand (VI), fixed across themes. */
@@ -102,10 +106,10 @@
   --field: rgba(120, 130, 150, 0.12);
   --glass-blur: blur(26px) saturate(180%);
   --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  --ink: #202a30;
-  --ink-2: #303c42;
-  --ink-3: #59656b;
-  --ink-4: #657176;
+  --ink: #2b3347;
+  --ink-2: #404a62;
+  --ink-3: #636d86;
+  --ink-4: #768099;
   --line: rgba(255, 255, 255, 0.7);
   --line-strong: rgba(60, 70, 90, 0.16);
   --line-soft: rgba(60, 70, 90, 0.08);
@@ -139,7 +143,7 @@
   --shadow-soft: 0 4px 12px rgba(28, 39, 51, 0.06);
   --shadow-thumb: 0 1px 2px rgba(28, 39, 51, 0.1), 0 1px 1px rgba(28, 39, 51, 0.04);
   --shadow-pop: 0 12px 32px rgba(28, 39, 51, 0.12);
-  --prose-ink: #26323a;
+  --prose-ink: #333c52;
   --code-bg: #f6f7f4;
   --selection: rgba(23, 107, 117, 0.16);
 }
@@ -157,10 +161,10 @@
   --daybar: rgba(255, 255, 255, 0.05);
   --field: rgba(255, 255, 255, 0.08);
   --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  --ink: #e7eceb;
-  --ink-2: #d2dada;
-  --ink-3: #a5b0b3;
-  --ink-4: #89979d;
+  --ink: #e9edf6;
+  --ink-2: #d3d9e6;
+  --ink-3: #a6aec2;
+  --ink-4: #8a93a9;
   --line: rgba(255, 255, 255, 0.14);
   --line-strong: rgba(255, 255, 255, 0.2);
   --line-soft: rgba(255, 255, 255, 0.08);
