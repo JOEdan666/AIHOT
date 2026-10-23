@@ -25,6 +25,13 @@ export const headers: Route.HeadersFunction = () => ({ "Cache-Control": "no-stor
 
 const NAV: Array<{ group: string; items: Array<{ to: string; label: string; count?: keyof Counts; tone?: "bad" | "accent" }> }> = [
   {
+    group: "我的",
+    items: [
+      { to: "/admin/desk", label: "灵感本" },
+      { to: "/admin/review", label: "每周回顾" },
+    ],
+  },
+  {
     group: "内容",
     items: [
       { to: "/admin/content", label: "内容诊断" },

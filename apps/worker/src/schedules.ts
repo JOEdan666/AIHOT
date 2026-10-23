@@ -11,6 +11,7 @@ import { refreshSourceIcons } from "@aihot/backend/sources/icons";
 import { computeHotRanking, snapshotHeat } from "@aihot/backend/events/hot";
 import { refreshStoryStatuses } from "@aihot/backend/events/digest";
 import { composeTopicDigests } from "@aihot/backend/events/topic-digest";
+import { scheduleWeeklyReviews } from "@aihot/backend/jobs/inspiration";
 import { linkRelatedStories } from "@aihot/backend/events/group";
 import { catchUpReports, composeDaily, composeMonthly, composeWeekly } from "@aihot/backend/reports/compose";
 import { addDays, beijingDate, isoWeekLabel } from "@aihot/contracts/time";
@@ -76,6 +77,8 @@ export const SCHEDULES: Scheduled[] = [
   { name: "feedback.forward", cron: "*/10 * * * *", run: () => forwardPendingFeedback() },
   ...(backupConfigured() ? [{ name: "ops.backup", cron: "10 4 * * *", missed: "once" as const, run: () => runBackup() }] : []),
   { name: "reports.source-health", cron: "0 9 * * 1", missed: "once", run: () => sourceHealthWeekly() },
+  // The owners' weekly reviews (their connections are model calls, made in the queued job).
+  { name: "inspiration.weekly-review", cron: "20 9 * * 1", missed: "once", run: () => scheduleWeeklyReviews() },
   // Four upstream checks a day; a new run is published only when the evidence changed. With collection
   // off only the computation runs, over the snapshots already stored.
   ...(FEATURES.leaderboard
