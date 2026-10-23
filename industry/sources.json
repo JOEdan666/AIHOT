@@ -782,6 +782,7 @@
         "externalIdPath": "id",
         "urlTemplate": "https://www.ycombinator.com/companies/{slug}",
         "summaryIsBody": true,
+        "sortByPublishedAt": true,
         "_aihot": {
           "initialBackfillLimit": 8
         }
