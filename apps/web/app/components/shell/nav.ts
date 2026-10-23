@@ -1,10 +1,7 @@
 // Site navigation, one place for the desktop sidebar, the mobile tab bar and the mobile "更多" page.
-import { withSubject } from "@aihot/industry/site";
 import { FEATURES } from "@aihot/industry/features";
 import type { ReactNode } from "react";
-import {
-  IconApps, IconBolt, IconBookmark, IconChart, IconDoc, IconFlame, IconGrid, IconHeart, IconHistory, IconList, IconMessage, IconPlug,
-} from "../icons";
+import { IconBolt, IconBookmark, IconChart, IconDoc, IconGrid, IconHeart, IconHistory, IconList } from "../icons";
 
 export interface NavItem {
   to: string;
@@ -18,15 +15,16 @@ export interface NavItem {
 
 export const SIDEBAR: Array<{ title: string; items: NavItem[] }> = [
   {
-    title: "内容",
+    title: "每周看一眼",
     items: [
-      { to: "/", label: "精选", icon: IconBolt, end: true },
-      { to: "/all", label: `全部${withSubject("动态")}`, icon: IconList },
-      { to: "/hot", label: "热点榜", icon: IconFlame },
-      { to: "/daily", label: withSubject("日报"), icon: IconDoc },
+      { to: "/", label: "本周", icon: IconBolt, end: true },
       { to: "/topics", label: "主题", icon: IconGrid },
-      { to: "/starred", label: "收藏", icon: IconBookmark },
+      { to: "/monthly", label: "月报", icon: IconDoc },
     ],
+  },
+  {
+    title: "我的",
+    items: [{ to: "/admin/desk", label: "灵感", icon: IconBookmark }],
   },
   // The optional AI-only modules (industry/features.ts).
   ...(FEATURES.leaderboard || FEATURES.codexResetMonitor
@@ -43,27 +41,20 @@ export const SIDEBAR: Array<{ title: string; items: NavItem[] }> = [
   {
     title: "更多",
     items: [
-      { to: "/agent", label: "Agent 接入", icon: IconPlug },
+      { to: "/all", label: "全部动态", icon: IconList },
       { to: "/about", label: "关于", icon: IconHeart },
-      { to: "/changelog", label: "更新日志", icon: IconHistory, changelog: true },
-      { to: "/feedback", label: "反馈", icon: IconMessage },
     ],
   },
 ];
 
+// Two places to be: this week's reading, and the notebook.
 export const TABBAR: NavItem[] = [
-  { to: "/", label: "精选", icon: IconBolt, end: true },
-  { to: "/all", label: "全部", icon: IconList },
-  { to: "/daily", label: "日报", icon: IconDoc },
-  { to: "/more", label: "更多", icon: IconApps, changelog: true },
+  { to: "/", label: "本周", icon: IconBolt, end: true },
+  { to: "/admin/desk", label: "灵感", icon: IconBookmark },
 ];
-
-/** Pages reached from the mobile "更多" tab keep that tab highlighted. */
-export const MORE_PATHS = ["/more", "/hot", "/topics", "/starred", "/leaderboard", "/codex-reset", "/agent", "/about", "/changelog", "/feedback", "/terms", "/privacy"];
 
 export function tabIsActive(item: NavItem, pathname: string): boolean {
   if (item.end) return pathname === item.to;
-  if (item.to === "/more") return MORE_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-  if (item.to === "/daily") return /^\/(daily|weekly|monthly)(\/|$)/.test(pathname);
+  if (item.to === "/monthly") return /^\/(daily|weekly|monthly)(\/|$)/.test(pathname);
   return pathname === item.to || pathname.startsWith(`${item.to}/`);
 }
