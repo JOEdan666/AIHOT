@@ -16,7 +16,8 @@ const KIND_TONE: Record<Kind, "muted" | "accent" | "warn"> = { thought: "muted",
 
 export async function loader({ request }: Route.LoaderArgs) {
   const sp = new URL(request.url).searchParams;
-  return adminGet<Data>(request, `/api/admin/desk?days=${sp.get("days") ?? "7"}${sp.get("noted") === "1" ? "&noted=1" : ""}`);
+  const item = sp.get("item");
+  return adminGet<Data>(request, `/api/admin/desk?days=${sp.get("days") ?? "7"}${sp.get("noted") === "1" ? "&noted=1" : ""}${item ? `&item=${encodeURIComponent(item)}` : ""}`);
 }
 
 export const meta: Route.MetaFunction = () => [{ title: `灵感本 · ${SITE.name} 后台` }];

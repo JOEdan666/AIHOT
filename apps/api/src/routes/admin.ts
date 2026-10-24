@@ -42,7 +42,7 @@ const noteId = (req: FastifyRequest) => (/^[1-9]\d{0,15}$/.test(param(req, "id")
 
 export function registerAdmin(app: FastifyInstance) {
   // Inspiration notebook: the signed-in owner's own notes and weekly review (private to them).
-  app.get("/api/admin/desk", adminHandler(async (req, _reply, admin) => loadDesk(ownerOf(admin), { days: Math.min(30, Math.max(1, Number(q(req).days) || 7)), noted: q(req).noted === "1" })));
+  app.get("/api/admin/desk", adminHandler(async (req, _reply, admin) => loadDesk(ownerOf(admin), { days: Math.min(30, Math.max(1, Number(q(req).days) || 7)), noted: q(req).noted === "1", item: q(req).item?.slice(0, 64) || null })));
   app.post("/api/admin/notes", adminHandler(async (req, _reply, admin) => addNote(ownerOf(admin), body(req))));
   app.patch("/api/admin/notes/:id", adminHandler(async (req, reply, admin) => orNotFound(req, reply, noteId(req) === null ? null : await updateNote(ownerOf(admin), noteId(req)!, body(req)))));
   app.delete("/api/admin/notes/:id", adminHandler(async (req, reply, admin) => orNotFound(req, reply, noteId(req) === null ? null : await deleteNote(ownerOf(admin), noteId(req)!))));

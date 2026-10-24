@@ -78,9 +78,10 @@ export interface DeskItem {
 /**
  * The desk: recent selected items, newest first, each with the owner's notes on it, plus notes written
  * without an item. `noted` lists every item the owner has written on, whatever its age, so no note is
- * left without a way to read, edit or delete it.
+ * left without a way to read, edit or delete it. `item` (from "记一笔" on the home page) is always listed,
+ * first, while it is public and selected, even when it is older than the window or past the list's size.
  */
-export async function loadDesk(owner: string, opts: { days?: number; noted?: boolean } = {}, now = new Date()): Promise<{ items: DeskItem[]; looseNotes: Note[] }> {
+export async function loadDesk(owner: string, opts: { days?: number; noted?: boolean; item?: string | null } = {}, now = new Date()): Promise<{ items: DeskItem[]; looseNotes: Note[] }> {
   const since = new Date(now.getTime() - (opts.days ?? 7) * 86400_000);
   const items = await sql<{ id: string; title: string; summary: string | null; url: string; category: string | null; tags: string[]; source_name: string; at: Date }[]>`
     SELECT p.article_id AS id, p.title, p.summary, p.url, p.category, p.tags, s.name AS source_name, p.timeline_at AS at
@@ -88,7 +89,8 @@ export async function loadDesk(owner: string, opts: { days?: number; noted?: boo
     WHERE ${opts.noted
       ? sql`EXISTS (SELECT 1 FROM notes n WHERE n.article_id = p.article_id AND n.owner = ${owner})`
       : sql`${selectedCondition(now)} AND p.timeline_at > ${since}`}
-    ORDER BY p.timeline_at DESC
+      ${opts.item ? sql`OR (p.article_id = ${opts.item} AND ${selectedCondition(now)})` : sql``}
+    ORDER BY ${opts.item ? sql`p.article_id = ${opts.item} DESC,` : sql``} p.timeline_at DESC
     LIMIT ${opts.noted ? 500 : 80}`;
   const notes = await sql<NoteRow[]>`
     SELECT id, article_id, kind, body, created_at, updated_at FROM notes

@@ -16,7 +16,7 @@ export async function loadWeekTop(opts: { lane?: LaneKey | null; limit?: number 
     WHERE ${selectedCondition(now)} AND p.timeline_at > ${new Date(now.getTime() - WINDOW_MS)} AND p.timeline_at <= ${now}
       ${laneCondition(opts.lane ?? null)}
     ORDER BY p.score DESC NULLS LAST, p.timeline_at DESC
-    LIMIT ${limit * 3}`;
+    LIMIT ${limit * 5}`;
   const seen = new Set<number>();
   const out: FeedItemSummary[] = [];
   for (const r of rows) {
