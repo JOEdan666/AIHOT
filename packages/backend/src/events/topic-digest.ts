@@ -24,6 +24,8 @@ const TOPICS_PER_RUN = 12;
 const Schema = z.object({
   headline: z.string().min(4).max(80),
   digest: z.string().min(40).max(1500),
+  // Optional: a bad or missing line is dropped, the digest still stands.
+  insight: z.string().max(200).catch(""),
 });
 
 interface WindowItem { id: string; title: string; summary: string | null; source_name: string; at: Date }
@@ -59,8 +61,8 @@ export async function composeTopicDigest(slug: string, now = new Date()): Promis
   });
   const version = (last?.version ?? 0) + 1;
   await sql.begin(async (tx) => {
-    await tx`INSERT INTO topic_digests (topic_slug, version, headline, digest, window_from, window_to, article_ids, inputs_hash, receipt_id)
-             VALUES (${slug}, ${version}, ${res.data.headline}, ${res.data.digest}, ${new Date(now.getTime() - WINDOW_MS)}, ${now},
+    await tx`INSERT INTO topic_digests (topic_slug, version, headline, digest, insight, window_from, window_to, article_ids, inputs_hash, receipt_id)
+             VALUES (${slug}, ${version}, ${res.data.headline}, ${res.data.digest}, ${res.data.insight.trim() || null}, ${new Date(now.getTime() - WINDOW_MS)}, ${now},
                      ${items.map((r) => r.id)}, ${inputsHash}, ${res.receiptId})`;
     await completeReceipt(tx, res.receiptId);
   });

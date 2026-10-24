@@ -146,6 +146,9 @@ test("an item noted long ago is still listed among the noted ones", async () => 
   assert.ok(!recent.items.some((i) => i.id === items[0]));
   const noted = JSON.parse((await call(alice, "GET", "/api/admin/desk?noted=1")).body) as { items: Array<{ id: string; notes: unknown[] }> };
   assert.ok(noted.items.some((i) => i.id === items[0] && i.notes.length > 0));
+  // "记一笔" from the home page names the item: it is listed first even though it is outside the window.
+  const asked = JSON.parse((await call(alice, "GET", `/api/admin/desk?item=${items[0]}`)).body) as { items: Array<{ id: string }> };
+  assert.equal(asked.items[0]!.id, items[0]);
 });
 
 test("Monday's schedule reviews the week just ended, under that week's Monday", async () => {

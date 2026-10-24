@@ -6,7 +6,6 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { CATEGORY_KEYS } from "@aihot/contracts/taxonomy";
 import { releaseBoundCache } from "../app/lib/api.server.ts";
 
 let web: ChildProcess;
@@ -29,6 +28,11 @@ const api = createServer((req, res) => {
     res.setHeader("X-Accel-Expires", `@${deadline}`);
     res.setHeader("Cache-Control", "public, max-age=30, s-maxage=30");
     return res.end(JSON.stringify({ filters, cards: [], nextCursor: null, refreshAt, dayCounts: [], hot: null, generatedAt: "2026-09-28T00:00:00Z" }));
+  }
+  if (url.pathname === "/api/site/week") {
+    res.setHeader("X-Accel-Expires", `@${deadline}`);
+    res.setHeader("Cache-Control", "public, max-age=30, s-maxage=30");
+    return res.end(JSON.stringify({ lane: url.searchParams.get("lane"), topicDigests: [], items: [], refreshAt, generatedAt: "2026-09-28T00:00:00Z" }));
   }
   if (url.pathname === "/api/site/hot") return res.end(JSON.stringify({ entries: [] }));
   if (url.pathname === "/api/site/echo-client") return res.end(JSON.stringify({ forwarded: req.headers["x-forwarded-for"], real: req.headers["x-real-ip"] }));
@@ -88,10 +92,9 @@ test("public route subsets produce the same complete navigation data; filters st
     return body;
   }));
   assert.ok(answers.every((body) => body === answers[0]));
-  const category = CATEGORY_KEYS.at(-1)!;
-  const filtered = await fetch(`${origin}/_.data?category=${category}&_routes=root`);
+  const filtered = await fetch(`${origin}/_.data?lane=startup&_routes=root`);
   const body = await filtered.text();
-  assert.ok(body.includes(category));
+  assert.ok(body.includes("startup"));
   assert.notEqual(body, answers[0]);
 });
 
@@ -99,7 +102,7 @@ test("HTML and navigation share freshness; cookies do not personalize public res
   const html = await fetch(`${origin}/`);
   assert.equal(html.status, 200);
   assert.equal(html.headers.get("X-Accel-Expires"), `@${deadline}`);
-  assert.match(await html.text(), /精选/);
+  assert.match(await html.text(), /本周/);
   const plain = await fetch(`${origin}/about.data`);
   const signedIn = await fetch(`${origin}/about.data?_routes=root`, { headers: { cookie: "admin_session=private; aihot_vid=reader" } });
   assert.match(plain.headers.get("Cache-Control")!, /^public,/);

@@ -9,9 +9,9 @@ import { selectedCondition } from "./items.ts";
 const SHOW_FOR_MS = 8 * 86400_000;
 
 export async function loadTopicDigests(opts: { slug?: string; limit?: number } = {}, now = new Date()): Promise<TopicDigestEntry[]> {
-  const rows = await sql<{ slug: string; name: string; headline: string; digest: string; window_from: Date; window_to: Date; n: number }[]>`
+  const rows = await sql<{ slug: string; name: string; headline: string; digest: string; insight: string | null; window_from: Date; window_to: Date; n: number }[]>`
     SELECT * FROM (
-      SELECT DISTINCT ON (d.topic_slug) d.topic_slug AS slug, t.name, d.headline, d.digest, d.window_from, d.window_to,
+      SELECT DISTINCT ON (d.topic_slug) d.topic_slug AS slug, t.name, d.headline, d.digest, d.insight, d.window_from, d.window_to,
         d.article_ids, cardinality(d.article_ids) AS n, d.created_at
       FROM topic_digests d JOIN topics t ON t.slug = d.topic_slug
       WHERE TRUE ${opts.slug ? sql`AND d.topic_slug = ${opts.slug}` : sql``}
@@ -24,5 +24,5 @@ export async function loadTopicDigests(opts: { slug?: string; limit?: number } =
   return rows
     .sort((a, b) => b.window_to.getTime() - a.window_to.getTime() || b.n - a.n)
     .slice(0, opts.limit ?? rows.length)
-    .map((r) => ({ slug: r.slug, name: r.name, headline: r.headline, digest: r.digest, windowFrom: r.window_from.toISOString(), windowTo: r.window_to.toISOString(), itemCount: r.n }));
+    .map((r) => ({ slug: r.slug, name: r.name, headline: r.headline, digest: r.digest, insight: r.insight, windowFrom: r.window_from.toISOString(), windowTo: r.window_to.toISOString(), itemCount: r.n }));
 }

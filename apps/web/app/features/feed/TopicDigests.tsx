@@ -25,6 +25,12 @@ export function TopicDigestCard({ digest, linkTopic = false }: { digest: TopicDi
       </div>
       <h3 className="text-[16px] font-bold leading-[1.45] text-ink">{digest.headline}</h3>
       <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">{digest.digest}</p>
+      {digest.insight && (
+        <p className="mt-2.5 rounded-control bg-accent-soft px-3 py-2 text-[13.5px] leading-relaxed text-ink-2">
+          <span className="font-semibold text-accent">启发 </span>
+          {digest.insight}
+        </p>
+      )}
     </article>
   );
 }
