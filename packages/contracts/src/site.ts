@@ -122,12 +122,24 @@ export interface TimelineResponse {
   generatedAt: string;
 }
 
+/** The home page: this week's topic threads and the week's best items, a list that ends. */
+export interface WeekResponse {
+  lane: LaneKey | null;
+  topicDigests: TopicDigestEntry[];
+  items: FeedItemSummary[];
+  /** Earliest pending release in this lane: caches of the page expire by then. */
+  refreshAt: string | null;
+  generatedAt: string;
+}
+
 /** A topic's last seven days, condensed into a headline and a short digest. */
 export interface TopicDigestEntry {
   slug: string;
   name: string;
   headline: string;
   digest: string;
+  /** What a builder could take from it; null when there was nothing worth saying. */
+  insight: string | null;
   windowFrom: string;
   windowTo: string;
   itemCount: number;

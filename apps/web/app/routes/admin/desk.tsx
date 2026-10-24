@@ -1,5 +1,6 @@
 import { SITE } from "@aihot/industry/site";
 import { useState } from "react";
+import { useSearchParams } from "react-router";
 import type { Route } from "./+types/desk";
 import { adminGet } from "../../lib/admin.server";
 import { useAdminAction } from "../../features/admin/action";
@@ -49,7 +50,7 @@ function NoteRow({ n }: { n: Note }) {
   );
 }
 
-function NoteBox({ articleId }: { articleId: string | null }) {
+function NoteBox({ articleId, autoFocus = false }: { articleId: string | null; autoFocus?: boolean }) {
   const { run, pending } = useAdminAction();
   const [body, setBody] = useState("");
   const [kind, setKind] = useState<Kind>("thought");
@@ -59,7 +60,7 @@ function NoteBox({ articleId }: { articleId: string | null }) {
   };
   return (
     <div className="mt-2 space-y-2">
-      <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="这条让你想到什么？同意吗？" maxLength={2000} className="!min-h-[60px]" />
+      <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="这条让你想到什么？同意吗？" maxLength={2000} autoFocus={autoFocus} className="!min-h-[60px]" />
       <div className="flex flex-wrap items-center gap-1.5">
         {(Object.keys(KIND_LABEL) as Kind[]).map((k) => (
           <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}
@@ -75,6 +76,8 @@ function NoteBox({ articleId }: { articleId: string | null }) {
 
 export default function Desk({ loaderData }: Route.ComponentProps) {
   const { items, looseNotes } = loaderData;
+  // Arriving from "记一笔" on the home page: that item's box is focused (and scrolled to by the #item- anchor).
+  const focusId = useSearchParams()[0].get("item");
   return (
     <AdminPage title="灵感本" subtitle="最近的精选，每条下面记一句你自己的判断。只有你自己看得到；每周一会据此生成回顾。">
       <div className="mb-4 flex flex-wrap gap-3">
@@ -92,7 +95,7 @@ export default function Desk({ loaderData }: Route.ComponentProps) {
       ) : (
         <div className="space-y-3">
           {items.map((it) => (
-            <article key={it.id} className="rounded-panel bg-surface p-4 ring-1 ring-line">
+            <article key={it.id} id={`item-${it.id}`} className={`card scroll-mt-28 p-4 ${focusId === it.id ? "ring-2 ring-accent/40" : ""}`}>
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-ink-4">
                 <span>{it.sourceName}</span>
                 <Time at={it.at} />
@@ -103,7 +106,7 @@ export default function Desk({ loaderData }: Route.ComponentProps) {
               </h3>
               {it.summary && <p className="mt-1 line-clamp-2 text-[13.5px] leading-relaxed text-ink-3">{it.summary}</p>}
               {it.notes.length > 0 && <ul className="mt-3 space-y-2 border-t border-line pt-3">{it.notes.map((n) => <NoteRow key={n.id} n={n} />)}</ul>}
-              <NoteBox articleId={it.id} />
+              <NoteBox articleId={it.id} autoFocus={focusId === it.id} />
             </article>
           ))}
         </div>

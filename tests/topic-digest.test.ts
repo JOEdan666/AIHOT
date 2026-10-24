@@ -17,10 +17,11 @@ const SOURCE = `test-topic-digest-${T}`;
 const SLUG = `test-topic-${T}`;
 const TAG = `测试主题-${T}`;
 const requests: Array<{ system: string; user: string }> = [];
+let insight: string | undefined;
 const provider = await stub((_hit, req) => {
   const body = JSON.parse(req.body) as { messages: Array<{ role: string; content: string }> };
   requests.push({ system: body.messages[0]!.content, user: body.messages.at(-1)!.content });
-  const content = { headline: `桌面机器人这周变便宜了 ${T}`, digest: `这七天有三个团队发布了低成本桌面机器人，做法都是用现成舵机加开源控制代码，面向想自己动手的爱好者。${T}` };
+  const content = { headline: `桌面机器人这周变便宜了 ${T}`, digest: `这七天有三个团队发布了低成本桌面机器人，做法都是用现成舵机加开源控制代码，面向想自己动手的爱好者。${T}`, ...(insight === undefined ? {} : { insight }) };
   return { id: `stub-${requests.length}`, choices: [{ message: { content: JSON.stringify(content) } }], usage: { prompt_tokens: 1, completion_tokens: 1 } };
 });
 Object.assign(process.env, { LLM_BASE_URL: `${provider.url}/v1`, LLM_API_KEY: "test-key", LLM_MODEL: "one-model", DIGEST_MODEL: "default", MODEL_CALLS_ENABLED: "true" });
@@ -72,6 +73,7 @@ test("three items: one digest written from them, shown on the topic page and the
   const [digest] = await loadTopicDigests({ slug: SLUG });
   assert.equal(digest!.headline, `桌面机器人这周变便宜了 ${T}`);
   assert.equal(digest!.itemCount, 3);
+  assert.equal(digest!.insight, null, "no insight line in the answer: none shown");
 
   const page = await app.inject({ method: "GET", url: `/api/site/topics/${SLUG}` });
   assert.equal(page.statusCode, 200);
@@ -89,6 +91,22 @@ test("the same items are not written again; a new item rewrites", async () => {
   assert.deepEqual(await composeTopicDigest(SLUG), { updated: true, version: 2 });
   assert.equal(requests.length, 2);
   assert.equal((await loadTopicDigests({ slug: SLUG })).length, 1, "the page reads the latest version only");
+});
+
+test("an insight line is kept when the model gives one, blank counts as none", async () => {
+  insight = `  做爱好者套件比做成品门槛低，国内淘宝渠道现成 ${T} `;
+  await selected("低成本桌面机器人 E");
+  assert.equal((await composeTopicDigest(SLUG)).updated, true);
+  assert.ok(requests.at(-1)!.system.includes("insight"));
+  assert.equal((await loadTopicDigests({ slug: SLUG }))[0]!.insight, insight.trim());
+  const home = JSON.parse((await app.inject({ method: "GET", url: "/api/site/week" })).body);
+  assert.equal(home.topicDigests.find((d: { slug: string }) => d.slug === SLUG).insight, insight.trim());
+
+  insight = "   ";
+  await selected("低成本桌面机器人 F");
+  assert.equal((await composeTopicDigest(SLUG)).updated, true);
+  assert.equal((await loadTopicDigests({ slug: SLUG }))[0]!.insight, null);
+  insight = undefined;
 });
 
 test("a withdrawn item hides the digest written from it, on the topic page too", async () => {

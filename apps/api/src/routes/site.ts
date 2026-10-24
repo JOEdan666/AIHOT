@@ -6,7 +6,7 @@ import { isCategoryKey, isChannelKey, isLaneKey, type CategoryKey, type ChannelK
 import { InvalidCursorError } from "@aihot/backend/lib/cursor";
 import { exportMarkdown, loadItemDetail, siteItemDetail } from "@aihot/backend/publication/detail";
 import { loadPool, SearchBusyError } from "@aihot/backend/publication/pool";
-import { loadTimeline } from "@aihot/backend/publication/timeline";
+import { loadTimeline, nextRelease } from "@aihot/backend/publication/timeline";
 import { loadStoryFollowups } from "@aihot/backend/publication/followups";
 import { loadDevelopments, loadGroupReports } from "@aihot/backend/publication/groups";
 import { loadTopicTags } from "@aihot/backend/publication/topics";
@@ -17,6 +17,7 @@ import { loadSiteStats } from "@aihot/backend/site/stats";
 import { itemAvailability } from "@aihot/backend/publication/availability";
 import { listTopicSummaries, loadTopicPage } from "@aihot/backend/publication/topics";
 import { loadTopicDigests } from "@aihot/backend/publication/topic-digests";
+import { loadWeekTop } from "@aihot/backend/publication/week";
 import { registerFeedback } from "./feedback.ts";
 
 import { loadHot, loadStoryDetail, resolveStory } from "@aihot/backend/publication/stories";
@@ -103,6 +104,21 @@ export function registerSite(app: FastifyInstance) {
     const body = { ...data, hot, topicDigests, generatedAt: new Date().toISOString() };
     const cc = cacheUntil(reply, 60, data.refreshAt);
     return sendJsonWithEtag(req, reply, body, { etagPrefix: "tl", cacheControl: cc, etagOf: { ...data, hot, topicDigests } });
+  }));
+
+  // The home page: this week's topic threads and the week's best items in a lane (or all).
+  app.get("/api/site/week", siteHandler(async (req, reply) => {
+    const q = looseQuery(req);
+    const lane = q.lane ?? null;
+    if (lane !== null && !isLaneKey(lane)) throw new BadRequest("invalid lane");
+    const now = new Date();
+    const [topicDigests, items, refreshAt] = await Promise.all([
+      loadTopicDigests({ limit: 4 }, now),
+      loadWeekTop({ lane }, now),
+      nextRelease({ channel: "all", category: null, lane, tag: null, topic: null }, now),
+    ]);
+    const body = { lane, topicDigests, items, refreshAt, generatedAt: now.toISOString() };
+    return sendJsonWithEtag(req, reply, body, { etagPrefix: "wk", cacheControl: cacheUntil(reply, 60, refreshAt), etagOf: { lane, topicDigests, items, refreshAt } });
   }));
 
   app.get("/api/site/pool", siteHandler(async (req, reply) => {
